@@ -22,10 +22,23 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, uploadAvatar } = useAuth();
   const { farmData, t } = useFarm();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      try {
+        await uploadAvatar(formData);
+      } catch (err) {
+        console.error("Failed to upload avatar:", err);
+      }
+    }
+  };
 
   // Dynamic Date Formatting
   const getMemberSince = () => {
@@ -91,10 +104,25 @@ const Profile = () => {
               
               <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16 relative z-10">
                 <div className="relative group">
-                  <div className="w-48 h-48 rounded-[56px] bg-deep-green text-white flex items-center justify-center text-7xl font-black shadow-[0_32px_64px_-16px_rgba(30,71,46,0.25)] border-8 border-white/50 backdrop-blur-sm">
-                    {user?.fullName?.[0] || 'F'}
-                  </div>
-                  <button onClick={() => alert("Image Upload Endpoint Coming Soon")} className="absolute bottom-2 right-2 p-3.5 bg-wheat-yellow text-white rounded-[24px] shadow-2xl border-4 border-white hover:scale-110 active:scale-90 transition-all">
+                  <input 
+                    type="file" 
+                    id="avatar-input" 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleAvatarChange} 
+                  />
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={`http://localhost:5000${user.avatarUrl}`} 
+                      alt="Avatar" 
+                      className="w-48 h-48 rounded-[56px] object-cover shadow-[0_32px_64px_-16px_rgba(30,71,46,0.25)] border-8 border-white/50 backdrop-blur-sm"
+                    />
+                  ) : (
+                    <div className="w-48 h-48 rounded-[56px] bg-deep-green text-white flex items-center justify-center text-7xl font-black shadow-[0_32px_64px_-16px_rgba(30,71,46,0.25)] border-8 border-white/50 backdrop-blur-sm">
+                      {user?.fullName?.[0] || 'F'}
+                    </div>
+                  )}
+                  <button onClick={() => document.getElementById('avatar-input').click()} className="absolute bottom-2 right-2 p-3.5 bg-wheat-yellow text-white rounded-[24px] shadow-2xl border-4 border-white hover:scale-110 active:scale-90 transition-all">
                     <Camera size={22} />
                   </button>
                 </div>
@@ -123,7 +151,7 @@ const Profile = () => {
                     </div>
                     <div className="flex items-center gap-2 px-5 py-2.5 bg-sky-50 text-sky-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-sky-100/50 shadow-sm">
                       <CheckCircle2 size={14} />
-                      Golden Tier Farmer
+                      {user?.tier || 'Golden Tier'} Farmer
                     </div>
                   </div>
                 </div>

@@ -39,6 +39,18 @@ export const authService = {
   register: async (userData) => {
     const response = await api.post('/auth/register', userData);
     return response.data;
+  },
+  updateProfile: async (userData) => {
+    const response = await api.put('/auth/profile', userData);
+    return response.data;
+  },
+  uploadAvatar: async (formData) => {
+    const response = await api.post('/auth/upload-avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
   }
 };
 
@@ -66,6 +78,22 @@ export const farmService = {
   // Fertilizer Recommendation Engine
   getRecommendation: async (id, weatherInfo) => {
     const response = await api.post(`/farm/${id}/recommendation`, weatherInfo);
+    return response.data;
+  },
+  // AI Recommendations
+  getAIRecommendations: async (id, rainChance) => {
+    const response = await api.get(`/farm/${id}/recommendations`, {
+      params: { rainChance }
+    });
+    return response.data;
+  },
+  // Crop Disease Scanning
+  scanCropDisease: async (formData) => {
+    const response = await api.post('/farm/diagnose', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return response.data;
   }
 };

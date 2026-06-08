@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { 
   Sprout, 
-  Droplets, 
-  AlertTriangle, 
   Clock, 
-  ArrowRight,
   CheckCircle2,
-  AlertCircle,
-  ThermometerSun
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFarm } from '../../context/FarmContext';
 
-const FertilizerCard = ({ currentRainChance }) => {
-  const { farmData, getFertilizerRecommendation, recommendation } = useFarm();
+const FertilizerCard = () => {
+  const { farmData, getFertilizerRecommendation, recommendation, weather } = useFarm();
   const [loading, setLoading] = useState(false);
+
+  const currentRainChance = weather?.rainfall_chance || 0;
 
   useEffect(() => {
     if (farmData.id) {
@@ -31,79 +29,75 @@ const FertilizerCard = ({ currentRainChance }) => {
   const isDelay = recommendation?.status === 'DELAY';
 
   return (
-    <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-6 flex flex-col h-full bg-gradient-to-br from-white to-green-50/20 relative overflow-hidden group">
-      {/* Dynamic Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className={`p-3 rounded-2xl ${isDelay ? 'bg-red-50 text-red-500' : 'bg-green-50 text-deep-green'} border ${isDelay ? 'border-red-100' : 'border-green-100'} shadow-sm`}>
-             <Sprout size={24} />
+    <div className="card-padded flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className={`p-2.5 rounded-xl ${isDelay ? 'bg-danger-50 text-red-500' : 'bg-primary-50 text-primary'}`}>
+            <Sprout size={20} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-800 tracking-tight">Fertilizer Guide</h3>
-            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-none mt-1">Smart Nutrient Engine</p>
+            <h3 className="text-base font-semibold text-gray-800">Fertilizer Guide</h3>
+            <p className="text-xs text-gray-400">Smart nutrient recommendation</p>
           </div>
         </div>
-        <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${
-          isDelay ? 'bg-red-50 text-red-600 border-red-100 animate-pulse' : 'bg-green-50 text-deep-green border-green-100'
+        <div className={`badge ${
+          isDelay ? 'bg-danger-50 text-red-600 border border-red-200' : 'badge-success'
         }`}>
           {recommendation?.status || 'Active'}
         </div>
       </div>
 
       {loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 py-12">
-           <div className="w-12 h-12 border-4 border-fresh-green/20 border-t-fresh-green rounded-full animate-spin" />
-           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Calculating Nutrients...</span>
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 py-10">
+          <div className="w-10 h-10 border-3 border-primary-100 border-t-primary rounded-full animate-spin" />
+          <span className="text-sm text-gray-400">Calculating nutrients...</span>
         </div>
       ) : (
         <AnimatePresence>
           <motion.div 
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex-1 space-y-6"
+            className="flex-1 space-y-4"
           >
-            {/* Recommendation Display */}
-            <div className="bg-white/60 backdrop-blur-sm p-6 rounded-[24px] border border-white shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Recommended Dose</span>
-                <Clock size={16} className="text-gray-300" />
+            {/* Recommendation */}
+            <div className="bg-surface-alt p-5 rounded-xl border border-border-light">
+              <div className="flex items-center justify-between mb-3">
+                <span className="stat-label">Recommended Dose</span>
+                <Clock size={14} className="text-gray-300" />
               </div>
-              <div className="text-2xl font-black text-gray-800 tracking-tight mb-1">{recommendation?.fertilizer || 'NPK 19:19:19'}</div>
-              <div className="flex items-baseline gap-1 text-fresh-green font-black">
-                <span className="text-3xl tracking-tighter">{recommendation?.quantity || '45'}</span>
-                <span className="text-sm uppercase">{recommendation?.unit || 'kg / Acre'}</span>
+              <div className="text-lg font-bold text-gray-800 mb-1">{recommendation?.fertilizer || 'NPK 19:19:19'}</div>
+              <div className="flex items-baseline gap-1.5 text-primary font-bold">
+                <span className="text-2xl tracking-tight">{recommendation?.quantity || '45'}</span>
+                <span className="text-sm">{recommendation?.unit || 'kg / Acre'}</span>
               </div>
             </div>
 
-            {/* Timing & Precision Alerts */}
-            <div className="grid grid-cols-1 gap-3">
-               <div className="flex items-center gap-4 p-4 bg-gray-50/50 rounded-2xl border border-gray-100 group-hover:border-fresh-green/30 transition-colors">
-                  <div className="text-deep-green"><Clock size={18} /></div>
-                  <div>
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Application Timing</div>
-                    <div className="text-xs font-bold text-gray-700">{recommendation?.timing || 'Morning'}</div>
-                  </div>
-               </div>
+            {/* Timing & Alerts */}
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-3 p-3.5 bg-surface-alt rounded-xl border border-border-light">
+                <Clock size={16} className="text-primary shrink-0" />
+                <div>
+                  <div className="stat-label text-[11px]">Application Timing</div>
+                  <div className="text-sm font-medium text-gray-700">{recommendation?.timing || 'Morning'}</div>
+                </div>
+              </div>
 
-               <div className={`flex items-start gap-4 p-4 rounded-2xl border transition-all ${
-                 isDelay ? 'bg-red-50/50 border-red-100' : 'bg-green-50/30 border-green-100'
-               }`}>
-                  <div className={isDelay ? 'text-red-500' : 'text-deep-green'}>
-                    {isDelay ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+              <div className={`flex items-start gap-3 p-3.5 rounded-xl border ${
+                isDelay ? 'bg-danger-50 border-red-200' : 'bg-primary-50 border-primary-100'
+              }`}>
+                {isDelay ? <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" /> : <CheckCircle2 size={16} className="text-primary shrink-0 mt-0.5" />}
+                <div>
+                  <div className={`stat-label text-[11px] ${isDelay ? 'text-red-400' : ''}`}>Precautions</div>
+                  <div className={`text-sm font-medium leading-snug mt-0.5 ${isDelay ? 'text-red-800' : 'text-gray-700'}`}>
+                    {recommendation?.precaution || 'Optimal conditions for nutrient uptake.'}
                   </div>
-                  <div>
-                    <div className={`text-[9px] font-black uppercase tracking-widest ${isDelay ? 'text-red-400' : 'text-deep-green/60'}`}>Precautions</div>
-                    <div className={`text-xs font-bold leading-tight mt-0.5 ${isDelay ? 'text-red-800' : 'text-gray-700'}`}>
-                      {recommendation?.precaution || 'Optimal conditions for nutrient uptake.'}
-                    </div>
-                  </div>
-               </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         </AnimatePresence>
       )}
-
-      <div className="absolute top-[-10%] right-[-10%] w-32 h-32 bg-fresh-green/5 blur-3xl pointer-events-none" />
     </div>
   );
 };

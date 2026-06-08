@@ -42,6 +42,30 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('agrosmart_user');
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      const updatedUser = await authService.updateProfile(profileData);
+      const newUser = { ...user, ...updatedUser };
+      setUser(newUser);
+      localStorage.setItem('agrosmart_user', JSON.stringify(newUser));
+      return newUser;
+    } catch (error) {
+      throw error.response?.data?.message || 'Profile update failed';
+    }
+  };
+
+  const uploadAvatar = async (formData) => {
+    try {
+      const response = await authService.uploadAvatar(formData);
+      const newUser = { ...user, avatarUrl: response.avatarUrl };
+      setUser(newUser);
+      localStorage.setItem('agrosmart_user', JSON.stringify(newUser));
+      return response.avatarUrl;
+    } catch (error) {
+      throw error.response?.data?.message || 'Avatar upload failed';
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -49,7 +73,9 @@ export const AuthProvider = ({ children }) => {
       loading,
       login, 
       signup,
-      logout 
+      logout,
+      updateProfile,
+      uploadAvatar
     }}>
       {!loading && children}
     </AuthContext.Provider>

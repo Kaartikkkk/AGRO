@@ -65,113 +65,109 @@ const TaskPanel = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm flex flex-col h-full relative group overflow-hidden">
-      {/* Decorative SVG Graphic */}
-      <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.03] group-hover:scale-125 transition-transform duration-1000">
-        <svg viewBox="0 0 100 100" fill="currentColor">
-           <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="2" strokeDasharray="5 5" fill="none" />
-        </svg>
-      </div>
-
-      <div className="flex items-center justify-between mb-8 relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="p-4 bg-fresh-green/10 text-fresh-green rounded-3xl border border-fresh-green/20">
-            <ListTodo size={28} />
+    <div className="card-padded flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-primary-50 text-primary rounded-xl">
+            <ListTodo size={20} />
           </div>
           <div>
-            <h3 className="text-2xl font-black text-gray-800 tracking-tight">Smart Tasks</h3>
-            <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.3em] mt-1">AI-Optimized Schedule</p>
+            <h3 className="text-base font-semibold text-gray-800">Tasks & Reminders</h3>
+            <p className="text-xs text-gray-400">Manage your farm schedule</p>
           </div>
         </div>
         <button 
           onClick={() => setShowAdd(!showAdd)}
-          className="p-3 bg-deep-green text-white rounded-2xl hover:bg-black transition-all shadow-lg shadow-green-100 group-hover:scale-110 active:scale-95"
+          className="p-2 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
-          <Plus size={24} />
+          <Plus size={18} />
         </button>
       </div>
 
+      {/* Add Task Form */}
       {showAdd && (
         <motion.form 
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: 'auto', opacity: 1 }}
           onSubmit={handleAddTask} 
-          className="mb-8 p-6 bg-gray-50 rounded-[32px] border border-gray-100 relative z-10 space-y-4"
+          className="mb-5 p-4 bg-surface-alt rounded-xl border border-border-light space-y-3"
         >
           <input 
             type="text" 
             placeholder="What needs to be done?"
-            className="w-full bg-white border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-fresh-green outline-none shadow-sm"
+            className="w-full bg-white border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             value={newTask.title}
             onChange={(e) => setNewTask({...newTask, title: e.target.value})}
             required
           />
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <input 
               type="date"
-              className="flex-1 bg-white border-none rounded-2xl px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-fresh-green outline-none shadow-sm"
+              className="flex-1 bg-white border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               value={newTask.scheduledFor}
               onChange={(e) => setNewTask({...newTask, scheduledFor: e.target.value})}
               required
             />
-            <button className="px-6 py-4 bg-deep-green text-wheat-yellow rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-colors">Add</button>
+            <button className="btn-primary text-sm py-2.5 px-5">Add</button>
           </div>
         </motion.form>
       )}
 
-      <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar relative z-10">
+      {/* Task List */}
+      <div className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
         <AnimatePresence>
           {tasks.length === 0 && !loading ? (
-            <div className="flex flex-col items-center justify-center h-full py-10 text-gray-300">
-               <div className="p-10 bg-gray-50 rounded-full mb-6">
-                 <Sparkles size={64} className="opacity-20" />
-               </div>
-               <p className="text-xs font-black uppercase tracking-widest mb-2">No Active Tasks</p>
-               <p className="text-[10px] uppercase tracking-widest text-gray-400">Everything is under control</p>
+            <div className="flex flex-col items-center justify-center h-full py-8 text-gray-300">
+              <Sparkles size={40} className="opacity-30 mb-3" />
+              <p className="text-sm font-medium">No active tasks</p>
+              <p className="text-xs text-gray-400 mt-1">Everything is under control</p>
             </div>
           ) : (
             tasks.map((task, i) => (
               <motion.div 
                 key={task.id}
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: i * 0.05 }}
-                className={`p-5 rounded-[28px] border flex items-center justify-between group/task transition-all hover:bg-gray-50/50 ${
-                  task.status === 'completed' ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-gray-50 shadow-sm hover:border-sky-100 shadow-gray-100/50'
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ delay: i * 0.03 }}
+                className={`p-3.5 rounded-xl border flex items-center justify-between group transition-colors ${
+                  task.status === 'completed' 
+                    ? 'bg-surface-alt border-border-light opacity-60' 
+                    : 'bg-white border-border hover:border-primary-100 hover:bg-primary-50/30'
                 }`}
               >
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-3">
                   <button 
                     onClick={() => toggleComplete(task.id, task.status)}
-                    className={`transition-all duration-300 ${
-                      task.status === 'completed' ? 'text-deep-green' : 'text-gray-200 hover:text-deep-green'
+                    className={`transition-colors ${
+                      task.status === 'completed' ? 'text-primary' : 'text-gray-300 hover:text-primary'
                     }`}
                   >
-                    {task.status === 'completed' ? <CheckCircle2 size={28} /> : <Circle size={28} />}
+                    {task.status === 'completed' ? <CheckCircle2 size={22} /> : <Circle size={22} />}
                   </button>
                   <div>
-                    <h4 className={`text-lg font-black leading-tight ${
+                    <h4 className={`text-sm font-semibold leading-tight ${
                       task.status === 'completed' ? 'text-gray-400 line-through' : 'text-gray-800'
                     }`}>
                       {task.title}
                     </h4>
-                    <div className="flex items-center gap-4 mt-2">
-                       <div className="flex items-center gap-1.5 text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                         <Calendar size={12} /> {new Date(task.scheduledFor).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
-                       </div>
-                       <div className="flex items-center gap-1.5 text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                         <Clock size={12} /> Early Morning
-                       </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="flex items-center gap-1 text-xs text-gray-400">
+                        <Calendar size={11} /> {new Date(task.scheduledFor).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-gray-400">
+                        <Clock size={11} /> Morning
+                      </span>
                     </div>
                   </div>
                 </div>
                 
                 <button 
                   onClick={() => deleteTask(task.id)}
-                  className="p-3 bg-red-50 text-red-100 group-hover/task:text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all scale-75 group-hover/task:scale-100 opacity-0 group-hover/task:opacity-100"
+                  className="p-2 text-gray-300 hover:text-red-500 hover:bg-danger-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </button>
               </motion.div>
             ))
@@ -179,15 +175,16 @@ const TaskPanel = () => {
         </AnimatePresence>
       </div>
 
-      <div className="mt-8 pt-8 border-t border-gray-50 relative z-10">
-        <button className="w-full flex items-center justify-between p-6 bg-gradient-to-r from-gray-50 to-white rounded-3xl border border-gray-100 hover:scale-[1.02] active:scale-95 transition-all group/btn shadow-sm">
-          <div className="flex items-center gap-4">
-             <div className="p-2 bg-wheat-yellow text-white rounded-xl shadow-lg shadow-wheat-yellow/20">
-                <Sparkles size={18} />
-             </div>
-             <span className="text-xs font-black text-gray-800 uppercase tracking-widest">View All Historical Data</span>
+      {/* Footer CTA */}
+      <div className="mt-5 pt-4 border-t border-border-light">
+        <button className="w-full flex items-center justify-between p-3.5 bg-surface-alt rounded-xl border border-border-light hover:border-border hover:bg-surface-hover transition-colors group">
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 bg-accent text-white rounded-lg">
+              <Sparkles size={14} />
+            </div>
+            <span className="text-xs font-semibold text-gray-700">View All Tasks</span>
           </div>
-          <ArrowRight size={20} className="text-gray-300 group-hover/btn:text-deep-green group-hover/btn:translate-x-1 transition-all" />
+          <ArrowRight size={16} className="text-gray-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
         </button>
       </div>
     </div>

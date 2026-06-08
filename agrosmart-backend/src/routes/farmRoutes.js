@@ -1,6 +1,7 @@
 const express = require('express');
 const farmController = require('../controllers/farmController');
 const { protect } = require('../middleware/authMiddleware');
+const upload = require('../utils/multer');
 
 const router = express.Router();
 
@@ -8,6 +9,10 @@ const router = express.Router();
 router.route('/')
   .get(protect, farmController.getFarms)
   .post(protect, farmController.addFarm);
+
+// Crop Disease Diagnosis
+router.route('/diagnose')
+  .post(protect, upload.single('image'), farmController.diagnoseCropDisease);
 
 // Specific farm plot actions (Update/Delete)
 router.route('/:id')
@@ -17,5 +22,9 @@ router.route('/:id')
 // Fertilizer Recommendation Logic
 router.route('/:id/recommendation')
   .post(protect, farmController.getRecommendation);
+
+// AI Recommendations
+router.route('/:id/recommendations')
+  .get(protect, farmController.getFarmRecommendations);
 
 module.exports = router;

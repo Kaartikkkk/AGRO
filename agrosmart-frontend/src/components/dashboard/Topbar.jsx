@@ -38,100 +38,105 @@ const Topbar = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="h-24 bg-white/80 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between px-4 lg:px-10 sticky top-0 z-40">
-      <div className="flex items-center gap-6">
+    <header className="h-16 bg-white border-b border-border flex items-center justify-between px-4 lg:px-6 sticky top-0 z-40">
+      <div className="flex items-center gap-4">
         <button 
           onClick={onMenuClick}
-          className="lg:hidden p-3 hover:bg-gray-100 rounded-2xl transition-colors"
+          className="lg:hidden p-2 hover:bg-surface-hover rounded-lg transition-colors"
         >
-          <Menu size={24} />
+          <Menu size={20} className="text-gray-600" />
         </button>
         
-        {/* Multi-Land Switcher */}
-        <div className="hidden lg:flex items-center gap-4 bg-gray-50 p-2 pr-4 rounded-[20px] border border-gray-100 hover:border-fresh-green/30 transition-all group shadow-sm">
-          <div className="p-2.5 bg-white text-deep-green rounded-xl shadow-sm border border-gray-100 group-hover:rotate-12 transition-transform">
-             <MapPin size={20} />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest leading-none mb-1">Select Land Plot</span>
-            <div className="relative flex items-center gap-2">
-              <select 
-                value={activeFarmId || ''} 
-                onChange={(e) => switchFarm(e.target.value)}
-                className="bg-transparent border-none p-0 pr-6 text-sm font-black text-gray-800 outline-none cursor-pointer appearance-none relative z-10"
-              >
-                {farms.map(farm => (
-                  <option key={farm.id} value={farm.id} className="bg-white text-gray-800 font-bold p-4">
-                    {farm.farmName} ({farm.acres} Ac)
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-0 text-gray-400 pointer-events-none" />
-            </div>
-          </div>
-          <div className="h-8 w-[1px] bg-gray-200 mx-2" />
+        {/* Farm Selector */}
+        <div className="hidden lg:flex items-center gap-3 bg-surface-alt px-3 py-1.5 rounded-lg border border-border">
+          <MapPin size={16} className="text-primary shrink-0" />
+          <select 
+            value={activeFarmId || ''} 
+            onChange={(e) => switchFarm(e.target.value)}
+            className="bg-transparent border-none text-sm font-medium text-gray-700 outline-none cursor-pointer appearance-none pr-6 min-w-[120px]"
+          >
+            {farms.map(farm => (
+              <option key={farm.id} value={farm.id}>
+                {farm.farmName} ({farm.acres} Ac)
+              </option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="text-gray-400 -ml-4 pointer-events-none" />
+          
+          <div className="h-5 w-px bg-border mx-1" />
+          
           <button 
             onClick={() => navigate('/complete-profile')}
-            className="p-2 text-fresh-green hover:bg-white hover:shadow-sm rounded-xl transition-all flex items-center gap-2 group/add"
+            className="p-1 text-primary hover:bg-primary-50 rounded transition-colors"
+            title="Add new plot"
           >
-             <PlusCircle size={20} className="group-hover/add:scale-110 transition-transform" />
-             <span className="text-[10px] font-black uppercase tracking-widest hidden xl:block">New Plot</span>
+            <PlusCircle size={16} />
           </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 lg:gap-8 relative">
+      <div className="flex items-center gap-2 lg:gap-3">
+        {/* Language Toggle */}
         <button 
           onClick={toggleLanguage}
-          className="p-3 px-4 rounded-2xl hover:bg-gray-50 border border-transparent hover:border-gray-100 font-black text-xs flex items-center gap-2 transition-all uppercase tracking-widest text-gray-500"
+          className="btn-ghost text-xs flex items-center gap-1.5 px-3 py-2"
         >
-          <Globe size={18} />
-          <span>{lang}</span>
+          <Globe size={16} />
+          <span className="hidden sm:inline uppercase font-semibold">{lang}</span>
         </button>
 
-        <button className="relative p-3 rounded-2xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-all group">
-          <Bell size={22} className="text-gray-400 group-hover:text-deep-green" />
-          <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white ring-2 ring-red-100 animate-pulse" />
+        {/* Notifications */}
+        <button className="relative p-2 rounded-lg hover:bg-surface-hover transition-colors">
+          <Bell size={18} className="text-gray-500" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
         </button>
 
-        <div className="h-10 w-[1px] bg-gray-100 hidden sm:block" />
+        <div className="h-6 w-px bg-border hidden sm:block" />
 
         {/* Profile Dropdown */}
         <div className="relative" ref={profileRef}>
           <button 
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-4 cursor-pointer group px-1 py-1 rounded-full hover:bg-gray-50 transition-all pr-4 outline-none"
+            className="flex items-center gap-3 cursor-pointer px-2 py-1.5 rounded-lg hover:bg-surface-hover transition-colors outline-none"
           >
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-deep-green to-fresh-green text-white flex items-center justify-center font-black shadow-lg shadow-green-100/50 group-hover:scale-110 transition-transform relative">
+            <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold">
               {user?.fullName?.[0] || 'F'}
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white shadow-sm" />
             </div>
-            <div className="text-right hidden sm:block">
-              <div className="text-sm font-black text-gray-800 leading-tight uppercase tracking-tight">{user?.fullName || 'Farmer'}</div>
-              <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{farmData?.cityVillage || 'Verified'}</div>
+            <div className="text-left hidden sm:block">
+              <div className="text-sm font-semibold text-gray-800 leading-tight">{user?.fullName || 'Farmer'}</div>
+              <div className="text-xs text-gray-400">{farmData?.cityVillage || 'Dashboard'}</div>
             </div>
-            <ChevronDown size={14} className={`text-gray-300 transition-transform duration-300 ${isProfileOpen ? 'rotate-180 text-deep-green' : 'group-hover:text-gray-600'}`} />
+            <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Dropdown Menu */}
           {isProfileOpen && (
-            <div className="absolute right-0 mt-4 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50 animate-in fade-in slide-in-from-top-2">
-              <div className="px-3 py-3 border-b border-gray-50 mb-2 sm:hidden text-center">
-                <div className="text-sm font-black text-gray-800">{user?.fullName || 'Farmer'}</div>
-                <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{user?.email}</div>
+            <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-border p-1.5 z-50">
+              <div className="px-3 py-2.5 border-b border-border-light mb-1.5 sm:hidden">
+                <div className="text-sm font-semibold text-gray-800">{user?.fullName || 'Farmer'}</div>
+                <div className="text-xs text-gray-400">{user?.email}</div>
               </div>
               
-              <button onClick={() => { setIsProfileOpen(false); navigate('/profile'); }} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-600 hover:text-deep-green hover:bg-green-50 rounded-xl transition-colors">
-                <User size={18} /> My Profile
+              <button 
+                onClick={() => { setIsProfileOpen(false); navigate('/profile'); }} 
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary hover:bg-primary-50 rounded-lg transition-colors"
+              >
+                <User size={16} /> My Profile
               </button>
-              <button disabled className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-400 cursor-not-allowed">
-                <Settings size={18} /> Settings (Soon)
+              <button 
+                disabled 
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-gray-300 cursor-not-allowed"
+              >
+                <Settings size={16} /> Settings
               </button>
               
-              <div className="h-[1px] bg-gray-50 my-2" />
+              <div className="h-px bg-border-light my-1.5" />
               
-              <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-colors">
-                <LogOut size={18} /> Logout
+              <button 
+                onClick={handleLogout} 
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-red-600 hover:bg-danger-50 rounded-lg transition-colors"
+              >
+                <LogOut size={16} /> Logout
               </button>
             </div>
           )}

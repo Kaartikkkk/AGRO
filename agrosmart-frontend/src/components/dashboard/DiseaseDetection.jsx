@@ -11,66 +11,40 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useFarm } from '../../context/FarmContext';
+import { farmService } from '../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DiseaseDetection = () => {
   const { t, farmData } = useFarm();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [result, setResult] = useState(null);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImageFile(file);
       setSelectedImage(URL.createObjectURL(file));
       setResult(null);
     }
   };
 
-  /**
-   * Dynamic Diagnostic Simulator 🧬🌾
-   * Returns species-specific results based on the farmer's active land plot.
-   */
-  const startScan = () => {
+  const startScan = async () => {
+    if (!imageFile) return;
     setIsScanning(true);
-    const crop = farmData?.cropType || 'Wheat';
+    try {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('cropType', farmData?.cropType || 'Wheat');
 
-    const database = {
-      Wheat: {
-        disease: "Wheat Rust (Puccinia triticina)",
-        confidence: "98.4%",
-        severity: "Moderate",
-        details: "Fungal disease causing orange-brown pustules on wheat leaf surfaces.",
-        remedy: "Application of Tebuconazole fungicide and resistant cultivar selection."
-      },
-      Rice: {
-        disease: "Rice Blast (Magnaporthe oryzae)",
-        confidence: "97.1%",
-        severity: "Critical",
-        details: "Lesions on leaves and neck rot. Major threat to basmati yield.",
-        remedy: "Tricyclazole spray and optimized nursery spacing."
-      },
-      Mustard: {
-        disease: "White Rust (Albugo candida)",
-        confidence: "95.8%",
-        severity: "Low",
-        details: "Pustules on the lower leaf side. Common in cooler Punjab winters.",
-        remedy: "Seed treatment with Metalaxyl and balanced NPK."
-      },
-      Cotton: {
-        disease: "Leaf Curl Virus (CLCuV)",
-        confidence: "99.2%",
-        severity: "Critical",
-        details: "Stunted growth and upward curling of cotton leaves.",
-        remedy: "Whitefly control using Imidacloprid and removal of infected plants."
-      }
-    };
-
-    setTimeout(() => {
-      const diagnosis = database[crop] || database.Wheat;
+      const data = await farmService.scanCropDisease(formData);
+      setResult(data);
+    } catch (error) {
+      console.error("Diagnostic scan failed:", error);
+    } finally {
       setIsScanning(false);
-      setResult(diagnosis);
-    }, 3000);
+    }
   };
 
   return (

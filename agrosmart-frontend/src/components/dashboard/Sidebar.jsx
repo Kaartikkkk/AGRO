@@ -30,6 +30,9 @@ const Sidebar = ({ isOpen, setToggle }) => {
     { icon: BrainCircuit, label: t('ai_recommendations'), path: '/ai' },
     { icon: ShieldAlert, label: t('disease_detection'), path: '/disease' },
     { icon: Sprout, label: t('fertilizer_hub'), path: '/fertilizer' },
+  ];
+
+  const bottomItems = [
     { icon: User, label: 'Profile', path: '/profile' },
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
@@ -39,40 +42,75 @@ const Sidebar = ({ isOpen, setToggle }) => {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           onClick={() => setToggle(false)}
         />
       )}
 
-      {/* Sidebar Container */}
+      {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 h-full w-72 bg-white border-r border-gray-100 z-50 transition-transform duration-300 ease-in-out
+        fixed top-0 left-0 h-full w-64 bg-white border-r border-border z-50 
+        transition-transform duration-300 ease-in-out flex flex-col
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <div className="p-8 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-deep-green font-bold text-2xl">
-            🌾 AgroSmart
+        {/* Logo */}
+        <div className="h-16 px-5 flex items-center justify-between border-b border-border-light shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Sprout size={18} className="text-white" />
+            </div>
+            <span className="text-lg font-bold text-gray-900">AgroSmart</span>
           </div>
-          <button onClick={() => setToggle(false)} className="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
-            <X size={20} />
+          <button 
+            onClick={() => setToggle(false)} 
+            className="lg:hidden p-1.5 hover:bg-surface-hover rounded-lg transition-colors"
+          >
+            <X size={18} className="text-gray-400" />
           </button>
         </div>
 
-        <nav className="mt-4 px-4 h-[calc(100vh-200px)] overflow-y-auto">
-          <ul className="space-y-2">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
+          <div className="mb-3 px-3">
+            <span className="section-label text-[11px]">Main Menu</span>
+          </div>
+          <ul className="space-y-0.5">
             {menuItems.map((item) => (
               <li key={item.path}>
                 <NavLink
                   to={item.path}
                   onClick={() => setToggle(false)}
                   className={({ isActive }) => `
-                    flex items-center gap-4 px-4 py-4 rounded-2xl font-semibold transition-all duration-200
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150
                     ${isActive 
-                      ? 'bg-deep-green text-white shadow-lg shadow-green-100 scale-105' 
-                      : 'text-gray-500 hover:bg-green-50 hover:text-deep-green'}
+                      ? 'bg-primary-50 text-primary border-l-[3px] border-primary pl-[9px]' 
+                      : 'text-gray-600 hover:bg-surface-hover hover:text-gray-900'}
                   `}
                 >
-                  <item.icon size={22} />
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 mb-3 px-3">
+            <span className="section-label text-[11px]">Account</span>
+          </div>
+          <ul className="space-y-0.5">
+            {bottomItems.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  onClick={() => setToggle(false)}
+                  className={({ isActive }) => `
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-all duration-150
+                    ${isActive 
+                      ? 'bg-primary-50 text-primary border-l-[3px] border-primary pl-[9px]' 
+                      : 'text-gray-600 hover:bg-surface-hover hover:text-gray-900'}
+                  `}
+                >
+                  <item.icon size={18} />
                   <span>{item.label}</span>
                 </NavLink>
               </li>
@@ -80,12 +118,13 @@ const Sidebar = ({ isOpen, setToggle }) => {
           </ul>
         </nav>
 
-        <div className="absolute bottom-0 left-0 w-full p-4 border-t border-gray-50">
+        {/* Logout */}
+        <div className="p-3 border-t border-border-light shrink-0">
           <button 
             onClick={logout}
-            className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl font-semibold text-red-500 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm text-red-600 hover:bg-danger-50 transition-colors"
           >
-            <LogOut size={22} />
+            <LogOut size={18} />
             <span>Logout</span>
           </button>
         </div>

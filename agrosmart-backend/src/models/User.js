@@ -28,6 +28,14 @@ const User = sequelize.define('User', {
     type: DataTypes.DATEONLY,
     allowNull: true
   },
+  avatarUrl: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  tier: {
+    type: DataTypes.STRING,
+    defaultValue: "Golden Tier"
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false

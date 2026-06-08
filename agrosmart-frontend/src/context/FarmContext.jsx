@@ -12,6 +12,7 @@ export const FarmProvider = ({ children }) => {
   const [activeFarmId, setActiveFarmId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recommendation, setRecommendation] = useState(null);
+  const [weather, setWeather] = useState(null);
 
   // Derived state for the currently active farm
   const farmData = farms.find(f => f.id === activeFarmId) || farms[0] || {
@@ -153,6 +154,8 @@ export const FarmProvider = ({ children }) => {
       farmData,
       loading,
       recommendation,
+      weather,
+      setWeather,
       fetchFarms,
       addFarm,
       updateFarm,
