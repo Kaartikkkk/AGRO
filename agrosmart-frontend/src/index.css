@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-deep-green: #2E7D32;
+  --color-fresh-green: #4CAF50;
+  --color-wheat-yellow: #FBC02D;
+  --color-sky-blue: #81D4FA;
+  --color-soil-brown: #6D4C41;
+  
+  --font-heading: "Poppins", "Montserrat", sans-serif;
+  --font-body: "Roboto", "Open Sans", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-body bg-gray-50 text-gray-900;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/20 backdrop-blur-lg border border-white/30 shadow-xl;
+  }
+  
+  .glass-dark {
+    @apply bg-black/30 backdrop-blur-md border border-white/10 shadow-2xl;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-deep-green text-white rounded-xl font-semibold hover:bg-fresh-green transition-all duration-300 shadow-md hover:shadow-lg active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 active:scale-95;
+  }
+}
+
+/* Custom Animations */
+@keyframes sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.animate-sway {
+  animation: sway 3s ease-in-out infinite;
+}
+
+.animate-sway-slow {
+  animation: sway 5s ease-in-out infinite;
+}
+
+.animate-sway-fast {
+  animation: sway 2s ease-in-out infinite;
+}
