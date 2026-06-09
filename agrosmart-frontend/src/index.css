@@ -58,7 +58,7 @@
   }
 
   .card-padded {
-    @apply card p-6;
+    @apply bg-white rounded-2xl border border-border shadow-sm p-6;
   }
 
   /* Buttons */
@@ -80,15 +80,15 @@
   }
 
   .badge-success {
-    @apply badge bg-primary-50 text-primary-700 border border-primary-100;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-100;
   }
 
   .badge-warning {
-    @apply badge bg-accent-50 text-amber-700 border border-amber-200;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-accent-50 text-amber-700 border border-amber-200;
   }
 
   .badge-danger {
-    @apply badge bg-danger-50 text-red-700 border border-red-200;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-danger-50 text-red-700 border border-red-200;
   }
 
   /* Section Label */
