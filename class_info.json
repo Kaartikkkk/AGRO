@@ -1,0 +1,458 @@
+{
+    "Apple___Apple_scab": {
+        "disease_name": "Apple Scab",
+        "crop": "Apple",
+        "symptoms": "Olive-green to dark brown velvety spots develop on the upper surface of leaves. Leaves may turn yellow and drop prematurely, while infected fruit develops scabby, corky brown lesions.",
+        "treatment": "Apply protective copper-based or sulfur fungicides. Prune trees to increase light penetration and airflow.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Rake and destroy fallen leaves and debris in autumn to reduce overwintering fungal spores.",
+            "Choose resistant apple cultivars for new plantings.",
+            "Avoid overhead irrigation to keep foliage dry."
+        ]
+    },
+    "Apple___Black_rot": {
+        "disease_name": "Black Rot",
+        "crop": "Apple",
+        "symptoms": "Foliage shows brown spots with purple margins, creating a frog-eye appearance. Fruit develops dark, sunken, rotting spots containing concentric rings and tiny black fruiting bodies.",
+        "treatment": "Prune out dead wood, cankers, and mummified fruit during the dormant season. Spray with labeled fungicides from green tip stage through harvest.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Remove and destroy pruned wood and mummified fruit from the orchard.",
+            "Sanitize pruning tools with 10% bleach or isopropyl alcohol between cuts.",
+            "Control insect pests to prevent physical wounds on fruit that serve as entry points."
+        ]
+    },
+    "Apple___Cedar_apple_rust": {
+        "disease_name": "Cedar Apple Rust",
+        "crop": "Apple",
+        "symptoms": "Bright yellow-orange circular spots appear on the upper surface of leaves in spring. Later in summer, small, tube-like structures form on the lower leaf surface, releasing orange spores.",
+        "treatment": "Apply preventative fungicides like myclobutanil or triadimefon during early blossom stage.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Remove nearby eastern red cedar or juniper trees within a 2-mile radius if possible.",
+            "Plant rust-resistant apple varieties.",
+            "Scout and prune galls from adjacent ornamental junipers before spring."
+        ]
+    },
+    "Apple___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Apple",
+        "symptoms": "Foliage is uniform in green color, with no spots, lesions, or unusual discolorations. Canopy is vigorous and showing healthy growth.",
+        "treatment": "No chemical treatment required. Maintain standard irrigation and fertilizing routines.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Monitor regularly for early signs of pests or nutritional deficiencies.",
+            "Prune annually to maintain structure and airflow.",
+            "Ensure proper soil drainage and aeration."
+        ]
+    },
+    "Blueberry___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Blueberry",
+        "symptoms": "Leaves are vibrant green and free of spots or powdery coatings. Stems are firm, and fruit clusters develop uniformly without mold.",
+        "treatment": "No treatment needed. Keep soil well-mulched to protect the shallow root system.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Maintain soil pH between 4.5 and 5.2 to ensure optimal nutrient uptake.",
+            "Apply organic mulch like pine bark to preserve moisture.",
+            "Water regularly, especially during the berry-ripening stage."
+        ]
+    },
+    "Cherry_(including_sour)___Powdery_mildew": {
+        "disease_name": "Powdery Mildew",
+        "crop": "Cherry",
+        "symptoms": "White, powdery patches of fungal mycelium coat the leaves and young shoots. Affected leaves curl upward, distort, and may eventually turn brown and fall off.",
+        "treatment": "Apply sulfur, potassium bicarbonate, or synthetic fungicides at the first sign of mildew.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Prune trees to open the canopy, maximizing sunlight penetration and airflow.",
+            "Avoid nitrogen-heavy fertilizers, which promote vulnerable succulent growth.",
+            "Irrigate from the base to avoid wetting the leaves."
+        ]
+    },
+    "Cherry_(including_sour)___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Cherry",
+        "symptoms": "Deep green foliage with smooth margins. Stems and bark show no lesions or sap oozing, and fruit matures to a healthy uniform color.",
+        "treatment": "No treatment required. Maintain routine cultural care and fertilization.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Conduct routine winter pruning to keep the center of the tree open.",
+            "Scout for aphids and cherry fruit flies regularly.",
+            "Apply organic mulch to maintain root moisture."
+        ]
+    },
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": {
+        "disease_name": "Gray Leaf Spot",
+        "crop": "Corn (Maize)",
+        "symptoms": "Rectangular, tan-to-gray lesions with sharp parallel margins develop along the leaf veins. In severe cases, these lesions merge, killing large areas of leaf tissue.",
+        "treatment": "Apply triazole or strobilurin fungicides if weather is warm and humid and lesions reach the ear leaf.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Rotate crops to non-host species like soybeans for at least one season.",
+            "Till under infected crop residue to accelerate decomposition of spores.",
+            "Select corn hybrids with high resistance scores for Gray Leaf Spot."
+        ]
+    },
+    "Corn_(maize)___Common_rust_": {
+        "disease_name": "Common Rust",
+        "crop": "Corn (Maize)",
+        "symptoms": "Pustules containing powdery, cinnamon-brown spores form on both the upper and lower leaf surfaces. Pustules may merge, causing leaves to turn yellow and die early.",
+        "treatment": "Fungicide treatment is rarely economical. In severe cases or seed fields, apply strobilurin or triazole sprays.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Plant resistant corn hybrids.",
+            "Plant early in the season to avoid the late summer peak of rust spores.",
+            "Manage field drainage to reduce humidity in the crop canopy."
+        ]
+    },
+    "Corn_(maize)___Northern_Leaf_Blight": {
+        "disease_name": "Northern Leaf Blight",
+        "crop": "Corn (Maize)",
+        "symptoms": "Long, elliptical, grayish-green or tan lesions form on the leaves, often described as cigar-shaped. The disease typically begins on lower leaves and progresses upward.",
+        "treatment": "Apply foliar fungicides if the disease progresses rapidly prior to silking.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Implement a crop rotation plan away from corn.",
+            "Practice deep tillage to bury infected plant residues.",
+            "Utilize hybrids containing Ht resistance genes."
+        ]
+    },
+    "Corn_(maize)___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Corn (Maize)",
+        "symptoms": "Vigorous green leaves growing vertically from a thick, sturdy stalk. Tassels and ears show healthy, normal development.",
+        "treatment": "No treatment required. Ensure adequate nitrogen levels.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Ensure proper spacing between plants to maximize sunlight absorption.",
+            "Monitor soil moisture levels during pollination.",
+            "Apply balanced fertilizer based on soil testing."
+        ]
+    },
+    "Grape___Black_rot": {
+        "disease_name": "Black Rot",
+        "crop": "Grape",
+        "symptoms": "Small, reddish-brown circular spots appear on leaves. As fruit matures, infected grapes shrivel, turn black, harden, and become covered in tiny black bumps.",
+        "treatment": "Apply fungicides like myclobutanil or mancozeb starting at bud break and continuing through post-bloom.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Meticulously prune out and destroy all mummified berries from vines and ground during winter.",
+            "Keep canopy open with shoot positioning to speed up leaf drying.",
+            "Avoid overhead watering."
+        ]
+    },
+    "Grape___Esca_(Black_Measles)": {
+        "disease_name": "Esca (Black Measles)",
+        "crop": "Grape",
+        "symptoms": "Leaves exhibit interveinal yellowing and browning, creating a distinct tiger-stripe pattern. Grapes display small, dark-purple spots scattered across the skin.",
+        "treatment": "No chemical cure is available. Protect pruning wounds with pruning paint. Remove and destroy dead trunk sections.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Avoid pruning vines during wet weather when fungal spores are active.",
+            "Sanitize pruning shears between vines.",
+            "Apply protective wound dressing to large cuts immediately."
+        ]
+    },
+    "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": {
+        "disease_name": "Leaf Blight",
+        "crop": "Grape",
+        "symptoms": "Irregularly shaped dark brown spots appear on the leaves. Severe infection causes leaves to dry out, curl at margins, and fall off prematurely.",
+        "treatment": "Apply copper-based fungicides or captan when symptoms first appear during wet seasons.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Rake and destroy fallen leaves in autumn.",
+            "Ensure wide row spacing and proper weeding to promote air circulation.",
+            "Prune lower shoots to prevent soil-to-leaf splashing."
+        ]
+    },
+    "Grape___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Grape",
+        "symptoms": "Vines are strong with vibrant green leaves and clear petioles. Berry clusters develop evenly without discoloration, shriveling, or mold.",
+        "treatment": "No treatment required. Maintain standard canopy management.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Prune annual growth to maintain structure and yield.",
+            "Manage weeds in the vine row to lower humidity.",
+            "Scout weekly for signs of insects or leaf discoloration."
+        ]
+    },
+    "Orange___Haunglongbing_(Citrus_greening)": {
+        "disease_name": "Citrus Greening (HLB)",
+        "crop": "Orange",
+        "symptoms": "Leaves show a blotchy yellow mottle that crosses veins. Fruit remains small, lopsided, poorly colored, and tastes extremely bitter, while branches experience severe dieback.",
+        "treatment": "No cure is available. Remove and destroy infected trees immediately to prevent vector spread. Control Asian citrus psyllid vectors.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Control the Asian citrus psyllid vector using systemic and foliar insecticides.",
+            "Purchase citrus trees exclusively from certified disease-free nurseries.",
+            "Regularly inspect trees for symptomatic yellow branches."
+        ]
+    },
+    "Peach___Bacterial_spot": {
+        "disease_name": "Bacterial Spot",
+        "crop": "Peach",
+        "symptoms": "Leaves develop small, angular, water-soaked spots that turn dark and fall out, creating a shot-hole appearance. Fruit exhibits dark, sunken spots and cracks.",
+        "treatment": "Apply copper-based bactericides during dormancy and bud break. Spray oxytetracycline during the growing season.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Avoid high nitrogen fertilization which prompts rapid, vulnerable shoot growth.",
+            "Plant resistant peach cultivars.",
+            "Avoid overhead irrigation to minimize bacterial spread."
+        ]
+    },
+    "Peach___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Peach",
+        "symptoms": "Leaves are smooth, lanceolate, and bright green with no holes. Branches are clean, and fruit is fuzz-covered and developing a uniform color.",
+        "treatment": "No treatment required. Thin fruit early to ensure large, high-quality yields.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Prune trees to an open-center shape to maximize sunlight penetration.",
+            "Scout for peach tree borers and plum curculios.",
+            "Water deeply but infrequently during dry spells."
+        ]
+    },
+    "Pepper,_bell___Bacterial_spot": {
+        "disease_name": "Bacterial Spot",
+        "crop": "Bell Pepper",
+        "symptoms": "Small, dark green, water-soaked spots form on leaf undersides, turning brown and raised on the upper surface. Severely infected leaves yellow and drop off.",
+        "treatment": "Apply preventative copper-based sprays early in wet seasons. Remove infected plant debris.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Plant certified pathogen-free seeds and transplants.",
+            "Rotate crops with non-solanaceous plants for at least 2 years.",
+            "Avoid working in the field when plants are wet."
+        ]
+    },
+    "Pepper,_bell___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Bell Pepper",
+        "symptoms": "Lush green foliage, sturdy stems, and deep green blocky peppers developing without spots, rot, or insect damage.",
+        "treatment": "No treatment needed. Keep soil evenly moist.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Apply mulch to maintain soil temperature and retain moisture.",
+            "Support plants with stakes or cages to prevent branch breakage.",
+            "Ensure balanced fertilization, limiting excessive nitrogen."
+        ]
+    },
+    "Potato___Early_blight": {
+        "disease_name": "Early Blight",
+        "crop": "Potato",
+        "symptoms": "Dark brown spots with concentric rings, resembling a target-board pattern, form on older leaves. Lower leaves yellow and die early.",
+        "treatment": "Spray protective fungicides like chlorothalonil or mancozeb at the first sign of symptoms.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Maintain optimal soil fertility and watering to reduce plant stress.",
+            "Rotate crops with corn, small grains, or grasses.",
+            "Destroy potato vine debris post-harvest."
+        ]
+    },
+    "Potato___Late_blight": {
+        "disease_name": "Late Blight",
+        "crop": "Potato",
+        "symptoms": "Large, dark brown water-soaked lesions appear on leaves, turning black when dry. In humid weather, a white, velvety mold grows on the leaf underside.",
+        "treatment": "Apply copper-based or systemic fungicides immediately. Kill the vines if harvest is near to prevent tuber infection.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Plant only certified, disease-free seed tubers.",
+            "Destroy all volunteer potato plants and cull piles in the area.",
+            "Select resistant cultivars."
+        ]
+    },
+    "Potato___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Potato",
+        "symptoms": "Robust green canopy, upright growth, and healthy stems showing no spotting, wilting, or white fungal growth.",
+        "treatment": "No treatment required. Keep soil hilled around the base of the plants.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Hill soil around potatoes to protect growing tubers from light and pests.",
+            "Water at soil level to keep foliage dry.",
+            "Monitor for potato beetles and aphids."
+        ]
+    },
+    "Raspberry___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Raspberry",
+        "symptoms": "Canes are strong and clean. Leaves are rich green, and berries grow in healthy clusters without mold, shriveling, or spots.",
+        "treatment": "No treatment required. Prune old fruiting canes after summer harvest.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Thin canes annually to maintain air circulation in the row.",
+            "Water plants at the base using drip irrigation.",
+            "Remove weeds to reduce humidity around the canes."
+        ]
+    },
+    "Soybean___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Soybean",
+        "symptoms": "Leaves are uniform green with no rust pustules or yellowing. Pods are growing strongly and roots show healthy pink nitrogen-fixing nodules.",
+        "treatment": "No treatment required. Conduct regular scouting.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Rotate crops with corn or wheat to disrupt pest cycles.",
+            "Plant seeds at recommended densities to avoid excessive canopy moisture.",
+            "Select high-yield, disease-resistant seed varieties."
+        ]
+    },
+    "Squash___Powdery_mildew": {
+        "disease_name": "Powdery Mildew",
+        "crop": "Squash",
+        "symptoms": "Powdery white fungal spots coat the surfaces of leaves, stems, and leaf stalks. Leaves eventually turn yellow, dry out, and become brittle.",
+        "treatment": "Apply neem oil, sulfur, or potassium bicarbonate fungicides. Space plants widely to promote drying.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Plant squash in full sun locations.",
+            "Select mildew-resistant squash varieties.",
+            "Remove and compost heavily infected leaves at the end of the season."
+        ]
+    },
+    "Strawberry___Leaf_scorch": {
+        "disease_name": "Leaf Scorch",
+        "crop": "Strawberry",
+        "symptoms": "Small, dark purple spots appear on the leaves. Over time, these spots expand, coalesce, and turn brown, making the entire leaf look scorched.",
+        "treatment": "Remove infected leaves. Apply protective fungicides containing copper or captan.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Avoid overhead irrigation; use drip hoses instead.",
+            "Renovate strawberry beds by mowing and thinning plants after harvest.",
+            "Keep beds weed-free to maximize airflow."
+        ]
+    },
+    "Strawberry___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Strawberry",
+        "symptoms": "Vibrant green leaves on short petioles, healthy runners, and bright red strawberries resting on clean mulch.",
+        "treatment": "No treatment required. Apply straw mulch to keep fruit off the soil.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Keep plants mulched with straw to prevent soil-borne rots.",
+            "Thin runner plants to avoid overcrowded beds.",
+            "Replace strawberry plants every 3 years to maintain vigor."
+        ]
+    },
+    "Tomato___Bacterial_spot": {
+        "disease_name": "Bacterial Spot",
+        "crop": "Tomato",
+        "symptoms": "Small, dark, water-soaked spots with yellow halos form on leaves. Leaf spots dry out and tear, while fruit develops dark, raised, scabby spots.",
+        "treatment": "Apply copper-based sprays combined with mancozeb. Remove and destroy infected plant parts immediately.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Avoid working in tomato fields when leaves are wet from rain or dew.",
+            "Rotate crops to avoid solanaceous plants for 2 to 3 years.",
+            "Sanitize support stakes and cages at the end of the season."
+        ]
+    },
+    "Tomato___Early_blight": {
+        "disease_name": "Early Blight",
+        "crop": "Tomato",
+        "symptoms": "Older leaves develop dark spots with concentric rings (target-board pattern). Leaves yellow and drop, exposing the fruit to sunscald.",
+        "treatment": "Prune off lower leaves. Apply preventative fungicides like chlorothalonil, copper, or mancozeb.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Mulch around the base of the plants to prevent soil-borne spores from splashing onto leaves.",
+            "Space plants at least 2 feet apart to ensure rapid drying of foliage.",
+            "Water at the base of the plant rather than overhead."
+        ]
+    },
+    "Tomato___Late_blight": {
+        "disease_name": "Late Blight",
+        "crop": "Tomato",
+        "symptoms": "Large, irregular, water-soaked dark spots appear on leaves and stems, turning brown and paper-like. Pale white mold grows on leaf undersides during wet weather.",
+        "treatment": "Apply copper-based fungicides immediately. Promptly remove and destroy infected plants to prevent airborne spread.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Grow resistant tomato varieties.",
+            "Destroy volunteer tomato and potato plants in the area.",
+            "Avoid watering foliage, especially late in the day."
+        ]
+    },
+    "Tomato___Leaf_Mold": {
+        "disease_name": "Leaf Mold",
+        "crop": "Tomato",
+        "symptoms": "Pale green or yellow spots form on the upper surface of leaves. Underneath, an olive-green to purple velvety mold grows, eventually drying the leaf.",
+        "treatment": "Apply copper fungicides or chlorothalonil. Improve greenhouse ventilation.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Keep greenhouse relative humidity below 85% with fans and venting.",
+            "Prune lower suckers to maximize airflow through the lower canopy.",
+            "Water at the base using drip irrigation."
+        ]
+    },
+    "Tomato___Septoria_leaf_spot": {
+        "disease_name": "Septoria Leaf Spot",
+        "crop": "Tomato",
+        "symptoms": "Numerous small, circular spots with dark margins and gray centers appear on lower leaves. Tiny black specks (fruiting bodies) form in the center of the spots.",
+        "treatment": "Apply copper fungicides or chlorothalonil regularly during wet weather. Remove heavily spotted lower leaves.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Mulch plants to create a barrier against soil-borne spores.",
+            "Practice strict weed control, as horse nettle and nightshade are hosts.",
+            "Rotate tomatoes with non-hosts every 2 years."
+        ]
+    },
+    "Tomato___Spider_mites Two-spotted_spider_mite": {
+        "disease_name": "Two-spotted Spider Mite",
+        "crop": "Tomato",
+        "symptoms": "Leaves display fine yellow speckling (stippling) on the upper surface. Fine webbing is visible on the undersides of leaves and stems, leading to bronzing.",
+        "treatment": "Spray plants with insecticidal soap, neem oil, or sulfur. Release predatory mites.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Keep plants well-watered, as hot, dry conditions trigger rapid mite reproduction.",
+            "Avoid broad-spectrum insecticides that kill natural beneficial predators.",
+            "Hose down plants periodically with a strong stream of water to dislodge mites."
+        ]
+    },
+    "Tomato___Target_Spot": {
+        "disease_name": "Target Spot",
+        "crop": "Tomato",
+        "symptoms": "Small, brown, circular spots appear on leaves and expand to show concentric rings. The center of the spots may drop out, leaving a shot-hole appearance.",
+        "treatment": "Apply fungicides like azoxystrobin or chlorothalonil. Remove lower diseased leaves.",
+        "severity": "Moderate",
+        "prevention_tips": [
+            "Clean up and bury crop debris immediately after harvest.",
+            "Ensure proper plant spacing for rapid foliage drying.",
+            "Support plants on stakes or trellises to keep foliage off the ground."
+        ]
+    },
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+        "disease_name": "Tomato Yellow Leaf Curl Virus",
+        "crop": "Tomato",
+        "symptoms": "Plants are severely stunted and erect. Leaves curl upward and inward, margins yellow, and flowers drop off, resulting in zero fruit yield.",
+        "treatment": "No chemical treatment is available. Control whitefly vectors using systemic insecticides or insecticidal soaps. Remove infected plants.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Use silver reflective mulches to deter whiteflies.",
+            "Install fine-mesh screens in greenhouses.",
+            "Plant virus-resistant tomato cultivars."
+        ]
+    },
+    "Tomato___Tomato_mosaic_virus": {
+        "disease_name": "Tomato Mosaic Virus",
+        "crop": "Tomato",
+        "symptoms": "Leaves show alternating light and dark green mottling (mosaic pattern). Leaflets may curl, appear skeletonized, or turn narrow and string-like.",
+        "treatment": "No cure exists. Dig up and burn infected plants. Disinfect hands and tools with soap or milk after handling.",
+        "severity": "Severe",
+        "prevention_tips": [
+            "Purchase certified virus-free seeds.",
+            "Soak tools in a 20% nonfat dry milk solution during pruning to deactivate the virus.",
+            "Do not smoke or handle tobacco products near tomato plants."
+        ]
+    },
+    "Tomato___healthy": {
+        "disease_name": "Healthy",
+        "crop": "Tomato",
+        "symptoms": "Vigorous green leaves, strong erect stems, and uniform fruit clusters ripening naturally. Roots are clean and white.",
+        "treatment": "No treatment required. Maintain stable watering and nutrition.",
+        "severity": "Mild",
+        "prevention_tips": [
+            "Mulch base, stake/cage plants, and prune suckers to keep canopy off the ground.",
+            "Apply calcium-rich fertilizer to prevent blossom end rot.",
+            "Inspect weekly for pests like hornworms and aphids."
+        ]
+    }
+}

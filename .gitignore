@@ -39,7 +39,10 @@ Dataset/
 dataset/
 Datasets/
 datasets/
+ML_Models/
 project/data/
+project/venv/
+project/scratch/
 *.csv
 *.h5
 *.keras

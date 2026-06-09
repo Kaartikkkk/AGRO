@@ -14,7 +14,8 @@ import MandiPage from '../pages/MandiPage';
 import RemindersPage from '../pages/RemindersPage';
 import AIAdvisorPage from '../pages/AIAdvisorPage';
 import DiseaseScannerPage from '../pages/DiseaseScannerPage';
-import FarmManagement from '../pages/FarmManagement';
+import LandManagement from '../pages/LandManagement';
+import PlotDetail from '../pages/LandManagement/PlotDetail';
 
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 
@@ -38,7 +39,15 @@ const AppRoutes = () => {
         path="/farms" 
         element={
           <ProtectedRoute>
-            <FarmManagement />
+            <LandManagement />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/farms/:id" 
+        element={
+          <ProtectedRoute>
+            <PlotDetail />
           </ProtectedRoute>
         } 
       />

@@ -292,65 +292,122 @@ exports.getFarmRecommendations = async (req, res) => {
   }
 };
 
-// Crop disease detection scanner
+// Crop disease detection
 exports.diagnoseCropDisease = async (req, res) => {
   try {
-    const { cropType } = req.body;
+    const { cropType, symptoms } = req.body;
     const crop = cropType || 'Wheat';
 
-    const database = {
+    // 1. Define mock database as fallback in case Flask API is offline
+    const fallbackDatabase = {
       Wheat: {
         disease: "Wheat Rust (Puccinia triticina)",
         confidence: "98.4%",
         severity: "Moderate",
-        details: "Fungal disease causing orange-brown pustules on wheat leaf surfaces.",
-        remedy: "Application of Tebuconazole fungicide and resistant cultivar selection."
+        details: "Fungal disease causing orange-brown pustules on wheat leaf surfaces. (Mock Fallback)",
+        remedy: "Application of Tebuconazole fungicide and resistant cultivar selection.",
+        top_3_predictions: [
+          { class: "Apple___healthy", disease: "Apple Healthy", confidence: 0.0349 }
+        ]
       },
       Rice: {
         disease: "Rice Blast (Magnaporthe oryzae)",
         confidence: "97.1%",
         severity: "Critical",
-        details: "Lesions on leaves and neck rot. Major threat to basmati yield.",
-        remedy: "Tricyclazole spray and optimized nursery spacing."
+        details: "Lesions on leaves and neck rot. Major threat to basmati yield. (Mock Fallback)",
+        remedy: "Tricyclazole spray and optimized nursery spacing.",
+        top_3_predictions: []
       },
       Mustard: {
         disease: "White Rust (Albugo candida)",
         confidence: "95.8%",
         severity: "Low",
-        details: "Pustules on the lower leaf side. Common in cooler Punjab winters.",
-        remedy: "Seed treatment with Metalaxyl and balanced NPK."
+        details: "Pustules on the lower leaf side. Common in Punjab winters. (Mock Fallback)",
+        remedy: "Seed treatment with Metalaxyl and balanced NPK.",
+        top_3_predictions: []
       },
       Cotton: {
         disease: "Leaf Curl Virus (CLCuV)",
         confidence: "99.2%",
         severity: "Critical",
-        details: "Stunted growth and upward curling of cotton leaves.",
-        remedy: "Whitefly control using Imidacloprid and removal of infected plants."
+        details: "Stunted growth and upward curling of cotton leaves. (Mock Fallback)",
+        remedy: "Whitefly control using Imidacloprid and removal of infected plants.",
+        top_3_predictions: []
       },
       Sugarcane: {
         disease: "Red Rot (Colletotrichum falcatum)",
         confidence: "94.5%",
         severity: "Critical",
-        details: "Reddish lesions on leaf midribs and internal stalk tissue decay.",
-        remedy: "Use of healthy seed setts, crop rotation, and water drainage."
+        details: "Reddish lesions on leaf midribs and internal stalk tissue decay. (Mock Fallback)",
+        remedy: "Use of healthy seed setts, crop rotation, and water drainage.",
+        top_3_predictions: []
       },
       Maize: {
         disease: "Common Rust (Puccinia sorghi)",
         confidence: "96.2%",
         severity: "Moderate",
-        details: "Golden-brown pustules on both upper and lower leaf surfaces.",
-        remedy: "Foliar fungicide application if infection occurs early in the season."
+        details: "Golden-brown pustules on both upper and lower leaf surfaces. (Mock Fallback)",
+        remedy: "Foliar fungicide application if infection occurs early in the season.",
+        top_3_predictions: []
       }
     };
 
-    const result = database[crop] || database.Wheat;
-    
-    if (req.file) {
-      result.imageUrl = `/uploads/${req.file.filename}`;
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided.' });
     }
 
-    res.json(result);
+    let result = null;
+
+    // 2. Attempt connection to local Flask AI service
+    try {
+      const fs = require('fs');
+      const fileBuffer = fs.readFileSync(req.file.path);
+      const blob = new Blob([fileBuffer], { type: req.file.mimetype });
+
+      const formData = new FormData();
+      formData.append('image', blob, req.file.originalname);
+      if (symptoms) {
+        formData.append('symptoms', symptoms);
+      }
+
+      console.log('🤖 Sending image to AI Model at http://localhost:5001/predict...');
+      const flaskResponse = await fetch('http://localhost:5001/predict', {
+        method: 'POST',
+        body: formData,
+        signal: AbortSignal.timeout(6000) // 6 second timeout
+      });
+
+      if (flaskResponse.ok) {
+        const data = await flaskResponse.json();
+        console.log('✅ AI Model responded successfully:', data.disease);
+        result = {
+          disease: data.disease,
+          confidence: (data.confidence * 100).toFixed(1) + "%",
+          severity: data.severity,
+          details: `Treatment recommended: ${data.treatment}`,
+          remedy: data.treatment,
+          top_3_predictions: data.top_3_predictions,
+          grad_cam_image: data.grad_cam_image
+        };
+      } else {
+        console.warn(`⚠️ Flask API returned error status ${flaskResponse.status}. Using fallback.`);
+      }
+    } catch (apiError) {
+      console.warn('⚠️ AI Model API connection failed (using fallback database):', apiError.message);
+    }
+
+    // 3. Fallback to mock data if AI model failed or is offline
+    if (!result) {
+      const baseResult = fallbackDatabase[crop] || fallbackDatabase.Wheat;
+      result = { ...baseResult };
+    }
+
+    // Add image url for frontend display
+    result.imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+
+    return res.json(result);
   } catch (error) {
+    console.error('❌ Diagnose Crop Disease Error:', error);
     res.status(500).json({ message: error.message });
   }
 };

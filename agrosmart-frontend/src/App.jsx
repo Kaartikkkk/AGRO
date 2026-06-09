@@ -3,17 +3,20 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
 import { AuthProvider } from './context/AuthContext';
 import { FarmProvider } from './context/FarmContext';
+import { ToastProvider } from './components/layout/Toast';
 
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <FarmProvider>
-          <div className="min-h-screen">
-            <AppRoutes />
-          </div>
-        </FarmProvider>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <FarmProvider>
+            <div className="min-h-screen">
+              <AppRoutes />
+            </div>
+          </FarmProvider>
+        </AuthProvider>
+      </ToastProvider>
     </Router>
   );
 }

@@ -16,6 +16,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/farm', require('./routes/farmRoutes'));
+app.use('/api/farms', require('./routes/farms'));
 app.use('/api/reminders', require('./routes/reminderRoutes'));
 
 // Routes Placeholder
