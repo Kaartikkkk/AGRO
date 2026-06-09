@@ -33,3 +33,26 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 agrosmart-frontend/Static/Videos/
+
+# Datasets and ML Models
+Dataset/
+dataset/
+Datasets/
+datasets/
+project/data/
+*.csv
+*.h5
+*.keras
+*.tflite
+*.pt
+*.pth
+*.onnx
+
+# ML Outputs and Explainability Artifacts
+project/outputs/
+project/models/
+grad_cam_output.jpg
+shap_output.png
+
+#
+PROJECT_ANALYSIS.md
