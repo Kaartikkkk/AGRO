@@ -1,0 +1,29 @@
+name: agrosmart_env
+version: 2.0.0
+description: A precision agriculture engine for RL agents, featuring spatial grid mapping, multi-action processing, and complex contagion dynamics.
+author: AgroSmart Team
+tasks:
+  - id: irrigation_fix
+    name: Precision Drought Management
+    difficulty: easy
+    description: Precisely target water supplies to suffering crops without overwatering already healthy sectors.
+  - id: pest_control
+    name: Contagion Containment
+    difficulty: medium
+    description: Stop a rapidly propagating pest infestation from crossing the geographic grid boundaries before it consumes the entire farm.
+  - id: yield_maximization
+    name: Spatial Yield Maximization
+    difficulty: hard
+    description: Balance nutrients, chemical treatments, and hydration across diverse crops over a volatile season.
+action_space:
+  type: json_schema
+  schema_path: models.Action
+observation_space:
+  type: json_schema
+  schema_path: models.Observation
+reward_range: [0.0, 1.0]
+tags:
+  - agriculture
+  - precision-farming
+  - spatial-simulation
+  - resource-management

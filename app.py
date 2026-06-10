@@ -10,8 +10,8 @@ def run_command(command, cwd):
 if __name__ == "__main__":
     # Define paths
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    frontend_dir = os.path.join(base_dir, "agrosmart-frontend")
-    backend_dir = os.path.join(base_dir, "agrosmart-backend")
+    frontend_dir = os.path.join(base_dir, "client")
+    backend_dir = os.path.join(base_dir, "server")
 
     print("🌾 --- AgroSmart Unified Starter --- 🌾")
     

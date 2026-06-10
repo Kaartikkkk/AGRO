@@ -1,61 +1,61 @@
-# Environments
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+.vite/
+
+# Environment files
 .env
 .env.local
-.env.*.local
-
-# Dependency directories
-node_modules/
-jspm_packages/
-agrosmart-env/
-venv/
-env/
-.venv/
+.env.production
+**/.env
 
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.pytest_cache/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
 
-# IDE & OS
-.vscode/
-.idea/
+# ML model files (too large for git)
+*.h5
+*.tflite
+*.pkl
+/ai/outputs/
+
+# OS files
 .DS_Store
-.AppleDouble
-.LSOverride
-*.swp
+Thumbs.db
 
 # Logs
-logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-agrosmart-frontend/Static/Videos/
+logs/
 
-# Datasets and ML Models
+# IDE
+.vscode/
+.idea/
+
+# Trash bin (our deleted files)
+/trash/
+
+# Datasets and local ML caches
+ML_Models/
 Dataset/
 dataset/
 Datasets/
 datasets/
-ML_Models/
-project/data/
-project/venv/
-project/scratch/
-*.csv
-*.h5
+ai/data/processed/
+ai/venv/
 *.keras
-*.tflite
 *.pt
 *.pth
 *.onnx
-
-# ML Outputs and Explainability Artifacts
-project/outputs/
-project/models/
 grad_cam_output.jpg
 shap_output.png
 
-#
-PROJECT_ANALYSIS.md
+# Large media files
+client/Static/Videos/
