@@ -17,6 +17,7 @@ import {
 import DashboardLayout from '../../components/layout/MainLayout';
 import PlotCard from './PlotCard';
 import AddPlotModal from './AddPlotModal';
+import LocationSetupModal from '../../components/common/LocationSetupModal';
 import PlotCardSkeleton from '../../components/common/Skeleton';
 import { useToast } from '../../components/common/Toast';
 import { landApi } from './landManagement.api';
@@ -66,9 +67,16 @@ const LandManagement = () => {
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPlot, setEditingPlot] = useState(null);
+  const [setupModalOpen, setSetupModalOpen] = useState(false);
+  const [setupModalFarmId, setSetupModalFarmId] = useState(null);
   
   // Delete confirm state
   const [deleteConfirmPlot, setDeleteConfirmPlot] = useState(null);
+
+  const handleSetLocationClick = (plot) => {
+    setSetupModalFarmId(plot.id);
+    setSetupModalOpen(true);
+  };
 
   // Undo delete tracking refs
   const deletedPlotsRef = useRef({});
@@ -384,6 +392,7 @@ const LandManagement = () => {
                   onDelete={handleDeleteTrigger}
                   onViewDetails={handleViewDetails}
                   onHarvest={handleHarvestClick}
+                  onSetLocation={handleSetLocationClick}
                 />
               ))}
             </AnimatePresence>
@@ -473,6 +482,18 @@ const LandManagement = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Location Setup Modal */}
+      <LocationSetupModal
+        isOpen={setupModalOpen}
+        onClose={() => {
+          setSetupModalOpen(false);
+          fetchPlots();
+        }}
+        mode="farm"
+        farmId={setupModalFarmId}
+        initialLocation={plots.find(p => p.id === setupModalFarmId)}
+      />
     </DashboardLayout>
   );
 };

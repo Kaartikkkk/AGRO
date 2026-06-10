@@ -16,13 +16,13 @@ if __name__ == "__main__":
     print("🌾 --- AgroSmart Unified Starter --- 🌾")
     
     # Start Backend
-    backend_process = run_command("npm install && npm start", backend_dir)
+    backend_process = run_command("npm start", backend_dir)
     
     # Give backend a moment to start
     time.sleep(2)
     
     # Start Frontend
-    frontend_process = run_command("npm install && npm run dev", frontend_dir)
+    frontend_process = run_command("npm run dev", frontend_dir)
 
     print("\n✅ Both servers are attempting to start...")
     print("📺 Backend: http://localhost:5000")

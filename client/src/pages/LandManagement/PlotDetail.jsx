@@ -29,6 +29,22 @@ import { formatIndianDate, getCropProgress } from '../../utils/cropSeasonDates';
 import { CROP_DETAILS } from '../../utils/cropRotationRules';
 import AddPlotModal from './AddPlotModal';
 import CropRotationPlanner from './CropRotationPlanner';
+import useWeather from '../../hooks/useWeather';
+import LocationSetupModal from '../../components/common/LocationSetupModal';
+import { 
+  Sun, 
+  Moon, 
+  Cloud, 
+  CloudRain, 
+  CloudSnow, 
+  CloudLightning, 
+  Wind, 
+  Droplets, 
+  AlertTriangle, 
+  AlertCircle, 
+  CheckCircle2, 
+  Thermometer 
+} from 'lucide-react';
 
 // Leaflet default icon fix
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -42,6 +58,99 @@ const DefaultIcon = L.icon({
   popupAnchor: [1, -34]
 });
 
+const getWeatherIcon = (iconCode, size = 24, className = "") => {
+  switch (iconCode) {
+    case '01d': return <Sun size={size} className={`text-amber-500 ${className}`} />;
+    case '01n': return <Moon size={size} className={`text-slate-400 ${className}`} />;
+    case '02d':
+    case '02n':
+    case '03d':
+    case '03n':
+    case '04d':
+    case '04n': return <Cloud size={size} className={`text-gray-400 ${className}`} />;
+    case '09d':
+    case '09n':
+    case '10d':
+    case '10n': return <CloudRain size={size} className={`text-blue-400 ${className}`} />;
+    case '11d':
+    case '11n': return <CloudLightning size={size} className={`text-indigo-500 ${className}`} />;
+    case '13d':
+    case '13n': return <CloudSnow size={size} className={`text-sky-300 ${className}`} />;
+    case '50d':
+    case '50n': return <Wind size={size} className={`text-gray-300 ${className}`} />;
+    default: return <Sun size={size} className={`text-amber-500 ${className}`} />;
+  }
+};
+
+const compileInsights = (weather, forecast) => {
+  const insights = [];
+  if (!weather) return insights;
+
+  const temp = weather.temp;
+  const humidity = weather.humidity;
+  const wind = weather.wind_speed;
+  const rainInForecast = forecast.some(f => f.rain_chance > 40);
+
+  if (temp > 40) {
+    insights.push({
+      type: 'critical',
+      title: 'Extreme Heat Warning',
+      description: 'Temperatures are dangerously high. Limit labor in the midday heat and ensure sensitive seedlings are shaded.',
+      icon: <AlertTriangle className="text-red-600 shrink-0" size={18} />
+    });
+  } else if (temp >= 35) {
+    insights.push({
+      type: 'warning',
+      title: 'High Heat Alert',
+      description: 'Irrigate fields early in the morning or late in the evening to minimize evaporative water loss.',
+      icon: <AlertTriangle className="text-amber-600 shrink-0" size={18} />
+    });
+  } else if (temp >= 15 && temp <= 30) {
+    insights.push({
+      type: 'optimal',
+      title: 'Ideal Farming Conditions',
+      description: 'Weather conditions are optimal for sowing, transplanting, weeding, and foliar spray application.',
+      icon: <CheckCircle2 className="text-primary shrink-0" size={18} />
+    });
+  } else if (temp < 10) {
+    insights.push({
+      type: 'info',
+      title: 'Frost Risk Warning',
+      description: 'Cold temperatures pose frost hazards. Cover vulnerable plants or apply light misting to protect soil heat.',
+      icon: <AlertTriangle className="text-blue-500 shrink-0" size={18} />
+    });
+  }
+
+  if (humidity > 80) {
+    insights.push({
+      type: 'warning',
+      title: 'Fungal Disease Risk',
+      description: 'High humidity (>80%) creates breeding conditions for fungal spores. Monitor leaf surfaces for blight.',
+      icon: <AlertCircle className="text-amber-600 shrink-0" size={18} />
+    });
+  }
+
+  if (wind > 30) {
+    insights.push({
+      type: 'warning',
+      title: 'High Wind Warning',
+      description: 'Wind speed is above 30 km/h. Postpone chemical spraying to avoid spray drift and wastage.',
+      icon: <Wind className="text-amber-650 shrink-0" size={18} />
+    });
+  }
+
+  if (rainInForecast) {
+    insights.push({
+      type: 'info',
+      title: 'Rain Predicted — Delay Spraying',
+      description: 'Precipitation is forecasted. Delay fertilizer or pest treatments to avoid nutrient runoff.',
+      icon: <CloudRain className="text-blue-500 shrink-0" size={18} />
+    });
+  }
+
+  return insights;
+};
+
 const PlotDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -51,7 +160,19 @@ const PlotDetail = () => {
   const [rotationHistory, setRotationHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSetupModalOpen, setIsSetupModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview'); // overview, rotation, history
+
+  const { 
+    weather, 
+    forecast, 
+    loading: weatherLoading, 
+    error: weatherError 
+  } = useWeather(
+    plot?.latitude !== undefined && plot?.latitude !== null
+      ? { latitude: plot.latitude, longitude: plot.longitude, label: plot.plotName } 
+      : { latitude: null, longitude: null }
+  );
 
   useEffect(() => {
     fetchPlotDetails();
@@ -316,6 +437,134 @@ const PlotDetail = () => {
               {/* Left Column: Basic Info & Timeline */}
               <div className="lg:col-span-2 space-y-6">
                 
+                {/* Plot Weather Sub-panel */}
+                {plot.latitude && plot.longitude ? (
+                  <div className="bg-gradient-to-br from-emerald-50/40 to-teal-50/20 border border-emerald-100 rounded-2xl p-6 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                      <div>
+                        <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+                          <CloudRain size={16} className="text-emerald-600 animate-pulse" /> Local Weather & Insights
+                        </h3>
+                        <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+                          This weather is specific to your plot in <strong className="text-emerald-700 font-semibold">{plot.village || plot.city}</strong>
+                        </p>
+                      </div>
+                      <span className="text-[10px] text-emerald-700 font-black uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-150 shrink-0 h-fit">
+                        Live updates
+                      </span>
+                    </div>
+
+                    {weatherLoading ? (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse">
+                        <div className="h-28 bg-white/60 rounded-xl border border-gray-100" />
+                        <div className="h-28 bg-white/60 rounded-xl border border-gray-100" />
+                        <div className="h-28 bg-white/60 rounded-xl border border-gray-100" />
+                      </div>
+                    ) : weatherError ? (
+                      <div className="text-center py-6 text-xs text-rose-500 font-bold flex items-center justify-center gap-1.5 bg-white/80 rounded-xl border border-gray-200">
+                        <AlertCircle size={14} /> {weatherError}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Current Conditions Card */}
+                        <div className="bg-white/80 backdrop-blur-xs border border-white p-4 rounded-xl flex items-center justify-between shadow-xs">
+                          <div className="space-y-1">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Current Weather</span>
+                            <div className="text-2xl font-black text-gray-900 leading-none py-1">
+                              {Math.round(weather?.temp)}°C
+                            </div>
+                            <p className="text-xs font-bold text-gray-755 capitalize">
+                              {weather?.condition}
+                            </p>
+                            <p className="text-[10px] text-gray-400">
+                              Feels like: {Math.round(weather?.feels_like)}°C
+                            </p>
+                          </div>
+                          <div className="p-2 bg-emerald-50 rounded-xl border border-emerald-100 shrink-0">
+                            {getWeatherIcon(weather?.icon, 36)}
+                          </div>
+                        </div>
+
+                        {/* 3-Day Outlook */}
+                        <div className="bg-white/80 backdrop-blur-xs border border-white p-4 rounded-xl shadow-xs flex flex-col justify-between">
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">3-Day Forecast</span>
+                          <div className="space-y-2 flex-1 flex flex-col justify-center">
+                            {forecast.slice(0, 3).map((day, idx) => (
+                              <div key={idx} className="flex items-center justify-between text-[11px] font-medium py-0.5 border-b border-gray-100 last:border-0">
+                                <span className="font-bold text-gray-600 w-16">{day.day}</span>
+                                <span className="shrink-0">{getWeatherIcon(day.icon, 14)}</span>
+                                <span className="font-black text-gray-800 text-right w-16">
+                                  {Math.round(day.high)}°/{Math.round(day.low)}°
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Detailed Stats */}
+                        <div className="bg-white/80 backdrop-blur-xs border border-white p-4 rounded-xl shadow-xs flex flex-col justify-between">
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2">Farming Stats</span>
+                          <div className="space-y-2 text-xs font-semibold text-gray-600 flex-1 flex flex-col justify-center">
+                            <div className="flex justify-between items-center">
+                              <span className="flex items-center gap-1 text-[11px] text-gray-500 font-bold"><Droplets size={12} className="text-blue-500" /> Humidity</span>
+                              <span className="text-gray-900 font-black">{weather?.humidity}%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="flex items-center gap-1 text-[11px] text-gray-500 font-bold"><Wind size={12} className="text-emerald-500" /> Wind speed</span>
+                              <span className="text-gray-900 font-black text-xs">{weather?.wind_speed} km/h</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="flex items-center gap-1 text-[11px] text-gray-500 font-bold"><Thermometer size={12} className="text-amber-500" /> UV Index</span>
+                              <span className="text-gray-900 font-black">{weather?.uv_index || 0}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Dynamic Agricultural Advice alerts */}
+                    {!weatherLoading && !weatherError && compileInsights(weather, forecast).length > 0 && (
+                      <div className="mt-4 space-y-2.5">
+                        {compileInsights(weather, forecast).map((insight, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium leading-relaxed ${
+                              insight.type === 'critical' ? 'bg-rose-50 text-rose-850 border-rose-100' :
+                              insight.type === 'warning' ? 'bg-amber-50 text-amber-850 border-amber-100' :
+                              insight.type === 'optimal' ? 'bg-emerald-50 text-emerald-850 border-emerald-100' :
+                              'bg-blue-50 text-blue-900 border-blue-100'
+                            }`}
+                          >
+                            <div className="mt-0.5 shrink-0">{insight.icon}</div>
+                            <div>
+                              <strong className="block font-black mb-0.5">{insight.title}</strong>
+                              <span className="text-gray-600 block">{insight.description}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Setup Location CTA Banner */
+                  <div className="bg-amber-50/50 border border-dashed border-amber-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-black text-amber-850 flex items-center gap-1.5">
+                        <MapPin size={16} className="text-amber-600" /> Plot Location Not Configured
+                      </h3>
+                      <p className="text-xs text-gray-500 max-w-xl font-medium">
+                        To receive real-time, field-specific weather alerts and localized crop growth forecasts, configure this plot's location.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsSetupModalOpen(true)}
+                      className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow hover:shadow-md cursor-pointer transition-colors shrink-0"
+                    >
+                      Set Location
+                    </button>
+                  </div>
+                )}
+
                 {/* TIMELINE VIEW */}
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
                   <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-1.5">
@@ -587,6 +836,18 @@ const PlotDetail = () => {
           fetchPlotDetails();
         }}
         editingPlot={plot}
+      />
+
+      {/* Setup Plot Location Modal */}
+      <LocationSetupModal
+        isOpen={isSetupModalOpen}
+        onClose={() => {
+          setIsSetupModalOpen(false);
+          fetchPlotDetails();
+        }}
+        mode="farm"
+        farmId={plot.id}
+        initialLocation={plot}
       />
     </DashboardLayout>
   );

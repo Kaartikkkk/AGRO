@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Header';
 import { motion } from 'framer-motion';
+import LocationOnboardingModal from '../common/LocationOnboardingModal';
 
 const DashboardLayout = ({ children, title, subtitle }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -47,6 +48,7 @@ const DashboardLayout = ({ children, title, subtitle }) => {
           </div>
         </footer>
       </div>
+      <LocationOnboardingModal />
     </div>
   );
 };

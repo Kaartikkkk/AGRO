@@ -9,12 +9,61 @@ import {
   Maximize2, 
   Calendar, 
   Droplet,
-  CheckCircle2
+  CheckCircle2,
+  Sun,
+  Moon,
+  Cloud,
+  CloudRain,
+  CloudLightning,
+  CloudSnow,
+  Wind
 } from 'lucide-react';
 import { formatIndianDate, getCropProgress } from '../../utils/cropSeasonDates';
 import { CROP_DETAILS } from '../../utils/cropRotationRules';
+import { useWeather } from '../../hooks/useWeather';
 
-const PlotCard = ({ plot, onEdit, onDelete, onViewDetails, onHarvest, index }) => {
+const getWeatherIcon = (iconCode, size = 14) => {
+  switch (iconCode) {
+    case '01d': return <Sun size={size} className="text-amber-500 shrink-0" />;
+    case '01n': return <Moon size={size} className="text-slate-400 shrink-0" />;
+    case '02d':
+    case '02n':
+    case '03d':
+    case '03n':
+    case '04d':
+    case '04n': return <Cloud size={size} className="text-gray-400 shrink-0" />;
+    case '09d':
+    case '09n':
+    case '10d':
+    case '10n': return <CloudRain size={size} className="text-blue-400 shrink-0" />;
+    case '11d':
+    case '11n': return <CloudLightning size={size} className="text-indigo-500 shrink-0" />;
+    case '13d':
+    case '13n': return <CloudSnow size={size} className="text-sky-300 shrink-0" />;
+    case '50d':
+    case '50n': return <Wind size={size} className="text-gray-300 shrink-0" />;
+    default: return <Sun size={size} className="text-amber-500 shrink-0" />;
+  }
+};
+
+const MiniPlotWeather = ({ location }) => {
+  const { weather, loading } = useWeather(location);
+
+  if (loading) {
+    return <div className="h-4 w-12 bg-gray-100 rounded animate-pulse shrink-0 self-center" />;
+  }
+
+  if (!weather) return null;
+
+  return (
+    <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-lg text-[10px] font-black text-primary shrink-0 self-center">
+      <span>{weather.temp}°C</span>
+      {getWeatherIcon(weather.icon, 12)}
+    </div>
+  );
+};
+
+const PlotCard = ({ plot, onEdit, onDelete, onViewDetails, onHarvest, onSetLocation, index }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -52,6 +101,8 @@ const PlotCard = ({ plot, onEdit, onDelete, onViewDetails, onHarvest, index }) =
     }
   };
 
+  const hasLocation = plot.latitude !== null && plot.longitude !== null;
+
   return (
     <motion.div
       variants={cardVariants}
@@ -62,16 +113,42 @@ const PlotCard = ({ plot, onEdit, onDelete, onViewDetails, onHarvest, index }) =
       className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col relative overflow-visible group"
     >
       {/* Card Header */}
-      <div className="p-5 pb-4 border-b border-gray-100 flex items-start justify-between">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary transition-colors truncate max-w-[180px]" title={plot.plotName}>
+      <div className="p-5 pb-4 border-b border-gray-100 flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary transition-colors truncate" title={plot.plotName}>
             {plot.plotName}
           </h3>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+          <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
             <MapPin size={12} className="text-gray-400 shrink-0" />
-            <span className="truncate max-w-[150px]">{plot.village}, {plot.state}</span>
+            {hasLocation ? (
+              <span className="truncate">{plot.city || plot.village}, {plot.state}</span>
+            ) : (
+              <span className="text-red-500 font-bold">Location not set</span>
+            )}
           </div>
+          {!hasLocation && (
+            <button
+              onClick={() => onSetLocation(plot)}
+              className="text-[10px] font-black text-primary hover:underline mt-1 block cursor-pointer text-left"
+            >
+              Add location for weather data &rarr;
+            </button>
+          )}
         </div>
+
+        {hasLocation && (
+          <MiniPlotWeather
+            location={{
+              id: plot.id,
+              label: plot.plotName,
+              type: 'farm',
+              city: plot.city || plot.village,
+              state: plot.state,
+              latitude: plot.latitude,
+              longitude: plot.longitude
+            }}
+          />
+        )}
 
         {/* 3-Dot Options Button */}
         <div className="relative" ref={menuRef}>

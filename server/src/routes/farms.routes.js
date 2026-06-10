@@ -234,4 +234,41 @@ router.post('/:id/rotation', protect, [
   }
 });
 
+// 9. PUT /api/farms/:id/location - Update farm location details only
+router.put('/:id/location', protect, [
+  body('city').trim().notEmpty().withMessage('City/Town is required'),
+  body('district').trim().notEmpty().withMessage('District is required'),
+  body('state').trim().notEmpty().withMessage('State is required'),
+  body('pincode').trim().notEmpty().withMessage('Pincode is required'),
+  body('latitude').isFloat().withMessage('Latitude must be a number'),
+  body('longitude').isFloat().withMessage('Longitude must be a number')
+], validate, async (req, res) => {
+  try {
+    const farm = await FarmNew.findOne({
+      where: { id: req.params.id, userId: req.user.id }
+    });
+
+    if (!farm) {
+      return res.status(404).json({ message: 'Plot not found' });
+    }
+
+    const { city, district, state, pincode, latitude, longitude } = req.body;
+
+    await farm.update({
+      city,
+      village: city, // Match city and village for backwards-compatibility
+      district,
+      state,
+      pincode,
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude)
+    });
+
+    res.status(200).json(farm);
+  } catch (error) {
+    console.error('Error updating farm location:', error);
+    res.status(500).json({ message: 'Failed to update farm location.' });
+  }
+});
+
 module.exports = router;

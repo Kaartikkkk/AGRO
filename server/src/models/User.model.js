@@ -39,6 +39,35 @@ const User = sequelize.define('User', {
   password: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  home_city: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  home_state: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  home_district: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  home_pincode: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  home_latitude: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  home_longitude: {
+    type: DataTypes.FLOAT,
+    allowNull: true
+  },
+  location_source: {
+    type: DataTypes.ENUM('gps', 'manual'),
+    defaultValue: 'manual',
+    allowNull: false
   }
 }, {
   hooks: {

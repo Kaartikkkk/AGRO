@@ -13,19 +13,30 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFarm } from '../../context/FarmContext';
+import { useLocation } from '../../context/LocationContext';
+import LocationSwitcherDropdown from './LocationSwitcherDropdown';
+import LocationSetupModal from '../common/LocationSetupModal';
 
 const Header = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
-  const { lang, toggleLanguage, farmData, farms, activeFarmId, switchFarm } = useFarm();
+  const { lang, toggleLanguage } = useFarm();
+  const { activeLocation, homeLocation, refreshAllLocations } = useLocation();
   const navigate = useNavigate();
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [isHomeSetupOpen, setIsHomeSetupOpen] = useState(false);
+  
   const profileRef = useRef(null);
+  const locationRef = useRef(null);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
+      }
+      if (locationRef.current && !locationRef.current.contains(event.target)) {
+        setIsLocationOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -35,6 +46,11 @@ const Header = ({ onMenuClick }) => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const getTruncatedLabel = (label) => {
+    if (!label) return 'Select Location';
+    return label.length > 15 ? label.slice(0, 13) + '..' : label;
   };
 
   return (
@@ -47,31 +63,30 @@ const Header = ({ onMenuClick }) => {
           <Menu size={20} className="text-gray-600" />
         </button>
         
-        {/* Farm Selector */}
-        <div className="hidden lg:flex items-center gap-3 bg-surface-alt px-3 py-1.5 rounded-lg border border-border">
-          <MapPin size={16} className="text-primary shrink-0" />
-          <select 
-            value={activeFarmId || ''} 
-            onChange={(e) => switchFarm(e.target.value)}
-            className="bg-transparent border-none text-sm font-medium text-gray-700 outline-none cursor-pointer appearance-none pr-6 min-w-[120px]"
+        {/* Unified Location Switcher */}
+        <div className="relative" ref={locationRef}>
+          <button
+            onClick={() => setIsLocationOpen(!isLocationOpen)}
+            className="flex items-center gap-2 bg-surface-alt hover:bg-surface-hover px-3 py-1.5 rounded-lg border border-border transition-colors cursor-pointer text-left"
           >
-            {farms.map(farm => (
-              <option key={farm.id} value={farm.id}>
-                {farm.farmName} ({farm.acres} Ac)
-              </option>
-            ))}
-          </select>
-          <ChevronDown size={14} className="text-gray-400 -ml-4 pointer-events-none" />
-          
-          <div className="h-5 w-px bg-border mx-1" />
-          
-          <button 
-            onClick={() => navigate('/complete-profile')}
-            className="p-1 text-primary hover:bg-primary-50 rounded transition-colors"
-            title="Add new plot"
-          >
-            <PlusCircle size={16} />
+            <div className="relative flex items-center shrink-0">
+              <MapPin size={16} className="text-primary shrink-0" />
+              {activeLocation?.source === 'gps' && (
+                <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-green-500 rounded-full border border-white animate-pulse" />
+              )}
+            </div>
+            <span className="text-sm font-semibold text-gray-700 select-clean">
+              {getTruncatedLabel(activeLocation?.label || activeLocation?.city)}
+            </span>
+            <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isLocationOpen ? 'rotate-180' : ''}`} />
           </button>
+
+          {/* Location Dropdown */}
+          <LocationSwitcherDropdown
+            isOpen={isLocationOpen}
+            onClose={() => setIsLocationOpen(false)}
+            onUpdateHome={() => setIsHomeSetupOpen(true)}
+          />
         </div>
       </div>
 
@@ -104,7 +119,7 @@ const Header = ({ onMenuClick }) => {
             </div>
             <div className="text-left hidden sm:block">
               <div className="text-sm font-semibold text-gray-800 leading-tight">{user?.fullName || 'Farmer'}</div>
-              <div className="text-xs text-gray-400">{farmData?.cityVillage || 'Dashboard'}</div>
+              <div className="text-xs text-gray-400">{activeLocation?.city || 'Dashboard'}</div>
             </div>
             <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -142,6 +157,17 @@ const Header = ({ onMenuClick }) => {
           )}
         </div>
       </div>
+
+      {/* Setup Home Location Modal */}
+      <LocationSetupModal
+        isOpen={isHomeSetupOpen}
+        onClose={() => {
+          setIsHomeSetupOpen(false);
+          refreshAllLocations();
+        }}
+        mode="home"
+        initialLocation={homeLocation}
+      />
     </header>
   );
 };

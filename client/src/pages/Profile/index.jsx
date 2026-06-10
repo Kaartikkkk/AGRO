@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../../components/layout/MainLayout';
 import { useAuth } from '../../context/AuthContext';
 import { useFarm } from '../../context/FarmContext';
+import { useLocation } from '../../context/LocationContext';
+import LocationSetupModal from '../../components/common/LocationSetupModal';
 import { 
   User, 
   Mail, 
@@ -14,7 +16,9 @@ import {
   CheckCircle2,
   ShieldCheck,
   Phone,
-  Sprout
+  Sprout,
+  Home,
+  Check
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -22,7 +26,18 @@ import { motion } from 'framer-motion';
 const Profile = () => {
   const { user, uploadAvatar } = useAuth();
   const { farmData, t } = useFarm();
+  const { homeLocation, farms, refreshAllLocations } = useLocation();
   const navigate = useNavigate();
+
+  const [isSetupModalOpen, setIsSetupModalOpen] = useState(false);
+  const [setupModalMode, setSetupModalMode] = useState('home');
+  const [setupModalFarmId, setSetupModalFarmId] = useState(null);
+
+  const handleEditLocationClick = (mode, farmId = null) => {
+    setSetupModalMode(mode);
+    setSetupModalFarmId(farmId);
+    setIsSetupModalOpen(true);
+  };
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -108,7 +123,7 @@ const Profile = () => {
               <div className="flex items-center justify-center md:justify-start gap-1.5 mb-4">
                 <MapPin size={14} className="text-gray-400" />
                 <span className="text-sm text-gray-500">
-                  {farmData.cityVillage || 'Ludhiana'}, {farmData.state || 'Punjab'}
+                  {homeLocation?.city || 'Ludhiana'}, {homeLocation?.state || 'Punjab'}
                 </span>
               </div>
               
@@ -175,7 +190,7 @@ const Profile = () => {
               <InfoRow icon={Mail} label="Email Address" value={user?.email || 'N/A'} />
               <InfoRow icon={Phone} label="Phone" value={user?.phoneNumber || '+91 98XXX XXXXX'} />
               <InfoRow icon={Calendar} label="Date of Birth" value={user?.dob || 'Not Provided'} />
-              <InfoRow icon={MapPin} label="Farm Location" value={`${farmData.cityVillage}, ${farmData.state}, India`} />
+              <InfoRow icon={MapPin} label="Farm Location" value={homeLocation ? `${homeLocation.city}, ${homeLocation.state}, India` : 'Not Set'} />
             </div>
           </motion.div>
 
@@ -196,7 +211,126 @@ const Profile = () => {
             </div>
           </motion.div>
         </div>
+
+        {/* SECTION: My Locations */}
+        <motion.div variants={itemVariants} className="card p-6 lg:p-8 space-y-6">
+          <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+            <div className="p-2.5 bg-emerald-50 text-primary rounded-xl">
+              <MapPin size={20} />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-800">📍 My Locations</h3>
+              <p className="text-xs text-gray-505 font-medium mt-0.5">Manage default and plot-specific locations</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* SUBSECTION A: Home Location */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-xs font-black text-gray-800 uppercase tracking-widest">Home Location</h4>
+                <p className="text-xs text-gray-400 font-semibold mt-0.5">Your residence — used as default location when no farm is active</p>
+              </div>
+
+              {homeLocation ? (
+                <div className="p-4 bg-gray-50 border border-gray-150 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-gray-800">
+                        {homeLocation.city}, {homeLocation.district}, {homeLocation.state}
+                      </span>
+                      <span className={`px-2 py-0.5 text-[8px] font-black uppercase rounded-full ${
+                        homeLocation.source === 'gps' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {homeLocation.source?.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-gray-400 font-semibold">
+                      Pincode: {homeLocation.pincode || 'N/A'} • Coordinates: {homeLocation.latitude?.toFixed(4)}, {homeLocation.longitude?.toFixed(4)}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleEditLocationClick('home')}
+                    className="px-3.5 py-1.5 bg-white text-gray-600 hover:text-primary border border-gray-250 hover:border-primary text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer self-start sm:self-auto"
+                  >
+                    Edit
+                  </button>
+                </div>
+              ) : (
+                <div className="p-4 bg-amber-50/40 border border-dashed border-amber-200 rounded-2xl text-center">
+                  <span className="text-xs font-bold text-amber-800 block mb-1">No Home Location Set</span>
+                  <button
+                    onClick={() => handleEditLocationClick('home')}
+                    className="text-[10px] font-black uppercase text-primary hover:underline"
+                  >
+                    Set Home Location &rarr;
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* SUBSECTION B: Farm Plot Locations */}
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-xs font-black text-gray-800 uppercase tracking-widest">Farm Plot Locations</h4>
+                <p className="text-xs text-gray-400 font-semibold mt-0.5">Each field can have its own coordinates for personalized weather alerts</p>
+              </div>
+
+              <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                {farms.length > 0 ? (
+                  farms.map((f) => (
+                    <div key={f.id} className="p-3.5 border border-gray-200 rounded-2xl flex items-center justify-between bg-gray-50/50 hover:bg-white transition-all text-left">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-gray-800 truncate max-w-[120px]">{f.label}</span>
+                          <span className="px-2 py-0.5 text-[8px] font-black uppercase rounded-full bg-emerald-100 text-emerald-800">
+                            ✓ Location set
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 font-semibold block">
+                          {f.city}, {f.state} • {f.pincode}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleEditLocationClick('farm', f.id)}
+                        className="px-3 py-1.5 bg-white text-gray-500 hover:text-primary border border-gray-200 hover:border-primary rounded-xl text-[10px] font-black uppercase transition-all cursor-pointer"
+                      >
+                        Edit Location
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 bg-gray-50 border border-dashed border-gray-200 rounded-2xl text-center">
+                    <span className="text-xs text-gray-450 font-bold block">No farm plots configured</span>
+                    <span className="text-[10px] text-gray-400 block mt-0.5">Please add plot locations in Land Management.</span>
+                  </div>
+                )}
+              </div>
+              <span className="text-[10px] text-gray-400 font-semibold block pt-1">
+                💡 All farms with geolocations get personalized weather forecasts and disease warnings.
+              </span>
+            </div>
+
+          </div>
+        </motion.div>
       </motion.div>
+
+      {/* Location Setup Modal */}
+      <LocationSetupModal
+        isOpen={isSetupModalOpen}
+        onClose={() => {
+          setIsSetupModalOpen(false);
+          refreshAllLocations();
+        }}
+        mode={setupModalMode}
+        farmId={setupModalFarmId}
+        initialLocation={
+          setupModalMode === 'home' 
+            ? homeLocation 
+            : farms.find(f => f.id === setupModalFarmId)
+        }
+      />
     </DashboardLayout>
   );
 };

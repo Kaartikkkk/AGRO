@@ -39,6 +39,10 @@ const FarmNew = sequelize.define('FarmNew', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   district: {
     type: DataTypes.STRING,
     allowNull: false
