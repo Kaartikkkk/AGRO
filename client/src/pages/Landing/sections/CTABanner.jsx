@@ -2,9 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 
 const CTABanner = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   return (
     <section className="py-20 px-6 bg-white select-none font-sans overflow-hidden">
@@ -38,12 +40,12 @@ const CTABanner = () => {
           {/* Action Button */}
           <motion.button
             type="button"
-            onClick={() => navigate('/register')}
+            onClick={() => navigate(isAuthenticated ? '/dashboard' : '/register')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="mt-8 bg-white text-[#1e4d35] hover:bg-green-50 font-bold rounded-full px-10 py-4 text-base flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer group"
           >
-            <span>Get Started Free</span>
+            <span>{isAuthenticated ? 'Go to Dashboard' : 'Get Started Free'}</span>
             <ArrowRight size={18} className="stroke-[2.5] group-hover:translate-x-1.5 transition-transform" />
           </motion.button>
 

@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Leaf, Menu, X } from 'lucide-react';
 import { useFarm } from '../../../context/FarmContext';
+import { useAuth } from '../../../context/AuthContext';
 
 const Navbar = () => {
   const { lang, toggleLanguage } = useFarm();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -71,23 +73,35 @@ const Navbar = () => {
             {lang === 'en' ? 'EN | हिं' : 'हिं | EN'}
           </button>
           
-          {/* Login Button */}
-          <button 
-            type="button"
-            onClick={() => navigate('/login')}
-            className="bg-white/5 border border-white/20 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-white/15 transition-all cursor-pointer active:scale-95"
-          >
-            Login
-          </button>
+          {isAuthenticated ? (
+            <button 
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="bg-[#22c55e] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#16a34a] transition-all cursor-pointer shadow-md active:scale-95"
+            >
+              Go to Dashboard
+            </button>
+          ) : (
+            <>
+              {/* Login Button */}
+              <button 
+                type="button"
+                onClick={() => navigate('/login')}
+                className="bg-white/5 border border-white/20 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-white/15 transition-all cursor-pointer active:scale-95"
+              >
+                Login
+              </button>
 
-          {/* Get Started Button */}
-          <button 
-            type="button"
-            onClick={() => navigate('/register')}
-            className="bg-[#22c55e] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#16a34a] transition-all cursor-pointer shadow-md active:scale-95"
-          >
-            Get Started
-          </button>
+              {/* Get Started Button */}
+              <button 
+                type="button"
+                onClick={() => navigate('/register')}
+                className="bg-[#22c55e] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#16a34a] transition-all cursor-pointer shadow-md active:scale-95"
+              >
+                Get Started
+              </button>
+            </>
+          )}
         </div>
 
         {/* Hamburger Menu (Mobile) */}
@@ -131,26 +145,41 @@ const Navbar = () => {
             ))}
 
             <div className="flex flex-col gap-3 pt-2">
-              <button 
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  navigate('/login');
-                }}
-                className="w-full text-center bg-white/10 border border-white/30 text-white rounded-full py-2.5 text-sm font-semibold hover:bg-white/20 transition-all"
-              >
-                Login
-              </button>
-              <button 
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  navigate('/register');
-                }}
-                className="w-full text-center bg-[#22c55e] text-white rounded-full py-2.5 text-sm font-semibold hover:bg-[#16a34a] transition-all shadow-md"
-              >
-                Get Started
-              </button>
+              {isAuthenticated ? (
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate('/dashboard');
+                  }}
+                  className="w-full text-center bg-[#22c55e] text-white rounded-full py-2.5 text-sm font-semibold hover:bg-[#16a34a] transition-all shadow-md"
+                >
+                  Go to Dashboard
+                </button>
+              ) : (
+                <>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate('/login');
+                    }}
+                    className="w-full text-center bg-white/10 border border-white/30 text-white rounded-full py-2.5 text-sm font-semibold hover:bg-white/20 transition-all"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate('/register');
+                    }}
+                    className="w-full text-center bg-[#22c55e] text-white rounded-full py-2.5 text-sm font-semibold hover:bg-[#16a34a] transition-all shadow-md"
+                  >
+                    Get Started
+                  </button>
+                </>
+              )}
             </div>
           </motion.div>
         )}

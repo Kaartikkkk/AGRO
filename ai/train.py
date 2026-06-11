@@ -63,6 +63,7 @@ def plot_history(log_csv_path, save_path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Run a quick verification pass with minimal epochs and data")
+    parser.add_argument("--no-resume", action="store_true", help="Do not resume from existing checkpoints, start from scratch")
     args = parser.parse_args()
     
     if args.dry_run:
@@ -172,21 +173,44 @@ def main():
     model = compile_model(model, lr=float(hyperparams["learning_rate"]))
     
     # Callbacks
+    p1_append = False
+    initial_epoch_ph1 = 0
+    skip_ph1 = False
+    if not args.no_resume and os.path.exists(training_log_path):
+        try:
+            log_df = pd.read_csv(training_log_path)
+            num_completed = len(log_df)
+            if num_completed >= p1_epochs:
+                print("Phase 1 training already completed. Loading Phase 1 weights.")
+                if os.path.exists(phase1_ckpt):
+                    model.load_weights(phase1_ckpt)
+                skip_ph1 = True
+            elif num_completed > 0:
+                print(f"Resuming Phase 1 training from epoch {num_completed}...")
+                if os.path.exists(phase1_ckpt):
+                    model.load_weights(phase1_ckpt)
+                initial_epoch_ph1 = num_completed
+                p1_append = True
+        except Exception as e:
+            print(f"[WARNING] Could not resume Phase 1: {e}. Starting from scratch.")
+
     callbacks_ph1 = [
         EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True, verbose=1),
         ModelCheckpoint(filepath=phase1_ckpt, monitor="val_loss", save_best_only=True, verbose=1),
         ReduceLROnPlateau(monitor="val_loss", factor=0.3, patience=3, min_lr=1e-6, verbose=1),
         TensorBoard(log_dir=os.path.join(outputs_dir, "logs/phase1")),
-        CSVLogger(filename=training_log_path, append=False)
+        CSVLogger(filename=training_log_path, append=p1_append)
     ]
     
-    print("Training only top layers...")
-    model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=p1_epochs,
-        callbacks=callbacks_ph1
-    )
+    if not skip_ph1:
+        print("Training only top layers...")
+        model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=p1_epochs,
+            initial_epoch=initial_epoch_ph1,
+            callbacks=callbacks_ph1
+        )
 
     # Cleanup dry-run files
     if args.dry_run:
@@ -226,13 +250,28 @@ def main():
     p2_batch_size = int(hyperparams["batch_size"]) if not args.dry_run else 8
     p2_epochs = 15 if not args.dry_run else 1
     
-    train_ds = create_multimodal_dataset(
-        train_subset_path, data_dir, tokenizer, batch_size=p2_batch_size, is_training=True
-    )
-    val_ds = create_multimodal_dataset(
-        val_subset_path, data_dir, tokenizer, batch_size=p2_batch_size, is_training=False
-    )
-    
+    # Check if Phase 2 is already trained / resumed
+    initial_epoch_ph2 = 0
+    skip_ph2 = False
+    if not args.no_resume and os.path.exists(training_log_path):
+        try:
+            log_df = pd.read_csv(training_log_path)
+            num_completed = len(log_df)
+            if num_completed >= p1_epochs:
+                completed_in_ph2 = num_completed - p1_epochs
+                if completed_in_ph2 >= p2_epochs:
+                    print("Phase 2 training already completed. Loading Phase 2 weights.")
+                    if os.path.exists(phase2_ckpt):
+                        model.load_weights(phase2_ckpt)
+                    skip_ph2 = True
+                elif completed_in_ph2 > 0:
+                    print(f"Resuming Phase 2 training from epoch {completed_in_ph2}...")
+                    if os.path.exists(phase2_ckpt):
+                        model.load_weights(phase2_ckpt)
+                    initial_epoch_ph2 = completed_in_ph2
+        except Exception as e:
+            print(f"[WARNING] Could not resume Phase 2: {e}")
+
     callbacks_ph2 = [
         EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True, verbose=1),
         ModelCheckpoint(filepath=phase2_ckpt, monitor="val_loss", save_best_only=True, verbose=1),
@@ -241,13 +280,21 @@ def main():
         CSVLogger(filename=training_log_path, append=True)
     ]
     
-    print("Fine-tuning top 30 layers...")
-    model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=p2_epochs,
-        callbacks=callbacks_ph2
-    )
+    if not skip_ph2:
+        train_ds = create_multimodal_dataset(
+            train_subset_path, data_dir, tokenizer, batch_size=p2_batch_size, is_training=True
+        )
+        val_ds = create_multimodal_dataset(
+            val_subset_path, data_dir, tokenizer, batch_size=p2_batch_size, is_training=False
+        )
+        print("Fine-tuning top 30 layers...")
+        model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=p2_epochs,
+            initial_epoch=initial_epoch_ph2,
+            callbacks=callbacks_ph2
+        )
 
     if args.dry_run:
         try:
@@ -288,13 +335,32 @@ def main():
     p3_batch_size = 16 if not args.dry_run else 8
     p3_epochs = 10 if not args.dry_run else 1
     
-    pd_train_ds = create_multimodal_dataset(
-        pd_train_subset, data_dir, tokenizer, batch_size=p3_batch_size, is_training=True
-    )
     pd_val_ds = create_multimodal_dataset(
         pd_test_subset, data_dir, tokenizer, batch_size=p3_batch_size, is_training=False
     )
     
+    # Check if Phase 3 is already trained / resumed
+    initial_epoch_ph3 = 0
+    skip_ph3 = False
+    if not args.no_resume and os.path.exists(training_log_path):
+        try:
+            log_df = pd.read_csv(training_log_path)
+            num_completed = len(log_df)
+            if num_completed >= (p1_epochs + p2_epochs):
+                completed_in_ph3 = num_completed - (p1_epochs + p2_epochs)
+                if completed_in_ph3 >= p3_epochs:
+                    print("Phase 3 training already completed. Loading Phase 3 weights.")
+                    if os.path.exists(phase3_ckpt):
+                        model.load_weights(phase3_ckpt)
+                    skip_ph3 = True
+                elif completed_in_ph3 > 0:
+                    print(f"Resuming Phase 3 training from epoch {completed_in_ph3}...")
+                    if os.path.exists(phase3_ckpt):
+                        model.load_weights(phase3_ckpt)
+                    initial_epoch_ph3 = completed_in_ph3
+        except Exception as e:
+            print(f"[WARNING] Could not resume Phase 3: {e}")
+
     callbacks_ph3 = [
         EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True, verbose=1),
         ModelCheckpoint(filepath=phase3_ckpt, monitor="val_loss", save_best_only=True, verbose=1),
@@ -303,13 +369,18 @@ def main():
         CSVLogger(filename=training_log_path, append=True)
     ]
     
-    print("Adapting model to PlantDoc domain...")
-    model.fit(
-        pd_train_ds,
-        validation_data=pd_val_ds,
-        epochs=p3_epochs,
-        callbacks=callbacks_ph3
-    )
+    if not skip_ph3:
+        pd_train_ds = create_multimodal_dataset(
+            pd_train_subset, data_dir, tokenizer, batch_size=p3_batch_size, is_training=True
+        )
+        print("Adapting model to PlantDoc domain...")
+        model.fit(
+            pd_train_ds,
+            validation_data=pd_val_ds,
+            epochs=p3_epochs,
+            initial_epoch=initial_epoch_ph3,
+            callbacks=callbacks_ph3
+        )
     
     # Evaluate on PlantDoc test split
     print("\n📊 Evaluating on PlantDoc Test Split...")

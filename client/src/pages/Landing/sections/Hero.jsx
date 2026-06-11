@@ -2,9 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Leaf, ArrowRight, ChevronDown } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 
 const Hero = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const letters = [
     { char: 'S', color: 'text-[#f59e0b]' },
@@ -123,26 +125,41 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.9 }}
           className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:w-auto"
         >
-          <motion.button
-            type="button"
-            onClick={() => navigate('/register')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full sm:w-auto bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold rounded-full px-8 py-4 text-base flex items-center justify-center gap-2 transition-all cursor-pointer group"
-          >
-            <span>Get Started</span>
-            <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
-          </motion.button>
-          
-          <motion.button
-            type="button"
-            onClick={() => navigate('/login')}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/20 text-white rounded-full px-8 py-4 text-base font-semibold backdrop-blur-md transition-all cursor-pointer"
-          >
-            Login
-          </motion.button>
+          {isAuthenticated ? (
+            <motion.button
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="w-full sm:w-auto bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold rounded-full px-8 py-4 text-base flex items-center justify-center gap-2 transition-all cursor-pointer group"
+            >
+              <span>Go to Dashboard</span>
+              <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+            </motion.button>
+          ) : (
+            <>
+              <motion.button
+                type="button"
+                onClick={() => navigate('/register')}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full sm:w-auto bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold rounded-full px-8 py-4 text-base flex items-center justify-center gap-2 transition-all cursor-pointer group"
+              >
+                <span>Get Started</span>
+                <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+              </motion.button>
+              
+              <motion.button
+                type="button"
+                onClick={() => navigate('/login')}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/20 text-white rounded-full px-8 py-4 text-base font-semibold backdrop-blur-md transition-all cursor-pointer"
+              >
+                Login
+              </motion.button>
+            </>
+          )}
         </motion.div>
 
       </div>
