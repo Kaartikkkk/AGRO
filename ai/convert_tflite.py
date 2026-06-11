@@ -62,36 +62,45 @@ def main():
     if not os.path.exists(train_csv):
         print(f"[ERROR] Train metadata not found at {train_csv} to build representative dataset.")
         sys.exit(1)
-        
-    tokenizer = load_tokenizer_pkl(tokenizer_path)
-    df_train = pd.read_csv(train_csv).head(100)
-    
-    # Load float32 model to get the exact input details order expected by TFLite
-    print("Loading float32 model to inspect TFLite input details...")
-    temp_interpreter = tf.lite.Interpreter(model_path=float32_tflite_path)
-    temp_interpreter.allocate_tensors()
-    input_details = temp_interpreter.get_input_details()
-    tflite_input_names = [d['name'] for d in input_details]
-    print("TFLite expected input ordering:", tflite_input_names)
+    is_multimodal = (len(model.inputs) > 1)
     
     calibration_samples = []
-    for _, row in df_train.iterrows():
-        img_path = os.path.join(data_dir, row["image_path"])
-        img_tensor = load_and_preprocess_image(img_path)
-        img_numpy = np.expand_dims(img_tensor.numpy(), axis=0).astype(np.float32) # (1, 224, 224, 3)
+    if is_multimodal:
+        tokenizer = load_tokenizer_pkl(tokenizer_path)
+        df_train = pd.read_csv(train_csv).head(100)
         
-        seq = tokenizer.texts_to_sequences([row["symptoms"]])
-        padded_seq = tf.keras.preprocessing.sequence.pad_sequences(seq, maxlen=50, padding="post")[0]
-        txt_numpy = np.expand_dims(padded_seq, axis=0).astype(np.int32) # (1, 50)
+        # Load float32 model to get the exact input details order expected by TFLite
+        print("Loading float32 model to inspect TFLite input details...")
+        temp_interpreter = tf.lite.Interpreter(model_path=float32_tflite_path)
+        temp_interpreter.allocate_tensors()
+        input_details = temp_interpreter.get_input_details()
+        tflite_input_names = [d['name'] for d in input_details]
+        print("TFLite expected input ordering:", tflite_input_names)
         
-        # Build calibration sample matching TFLite inputs ordering
-        sample = []
-        for name in tflite_input_names:
-            if "image_input" in name:
-                sample.append(img_numpy)
-            elif "text_input" in name:
-                sample.append(txt_numpy)
-        calibration_samples.append(sample)
+        for _, row in df_train.iterrows():
+            img_path = os.path.join(data_dir, row["image_path"])
+            img_tensor = load_and_preprocess_image(img_path)
+            img_numpy = np.expand_dims(img_tensor.numpy(), axis=0).astype(np.float32) # (1, 224, 224, 3)
+            
+            seq = tokenizer.texts_to_sequences([row["symptoms"]])
+            padded_seq = tf.keras.preprocessing.sequence.pad_sequences(seq, maxlen=50, padding="post")[0]
+            txt_numpy = np.expand_dims(padded_seq, axis=0).astype(np.int32) # (1, 50)
+            
+            # Build calibration sample matching TFLite inputs ordering
+            sample = []
+            for name in tflite_input_names:
+                if "image_input" in name:
+                    sample.append(img_numpy)
+                elif "text_input" in name:
+                    sample.append(txt_numpy)
+            calibration_samples.append(sample)
+    else:
+        df_train = pd.read_csv(train_csv).head(100)
+        for _, row in df_train.iterrows():
+            img_path = os.path.join(data_dir, row["image_path"])
+            img_tensor = load_and_preprocess_image(img_path)
+            img_numpy = np.expand_dims(img_tensor.numpy(), axis=0).astype(np.float32)
+            calibration_samples.append([img_numpy])
         
     def representative_dataset_gen():
         for sample in calibration_samples:
@@ -104,7 +113,7 @@ def main():
     
     # Ensure select TF ops are supported (required for LSTM / Embeddings)
     quant_converter.target_spec.supported_ops = [
-        tf.lite.OpsSet.TFLITE_BUINS if hasattr(tf.lite.OpsSet, 'TFLITE_BUINS') else tf.lite.OpsSet.TFLITE_BUILTINS,
+        tf.lite.OpsSet.TFLITE_BUILTINS,
         tf.lite.OpsSet.SELECT_TF_OPS
     ]
     
@@ -146,20 +155,20 @@ def main():
     int8_inputs_map = {details['name'].split(':')[0]: details for details in input_details_int8}
     
     # Latency timing helper
-    def run_tflite_inference(interpreter, inputs_map, output_details, img, txt):
+    def run_tflite_inference(interpreter, inputs_map, output_details, img, txt=None):
         start = time.perf_counter()
         
         for name, details in inputs_map.items():
-            if "image_input" in name:
+            if "image_input" in name or len(inputs_map) == 1:
                 interpreter.set_tensor(details['index'], img)
-            elif "text_input" in name:
+            elif "text_input" in name and txt is not None:
                 interpreter.set_tensor(details['index'], txt)
                 
         interpreter.invoke()
         output = interpreter.get_tensor(output_details[0]['index'])
         latency = (time.perf_counter() - start) * 1000.0
         return output, latency
-
+ 
     # Evaluate comparison
     records = []
     for idx, row in df_test.iterrows():
@@ -167,13 +176,19 @@ def main():
         img_tensor = load_and_preprocess_image(img_path)
         img_numpy = np.expand_dims(img_tensor.numpy(), axis=0).astype(np.float32)
         
-        seq = tokenizer.texts_to_sequences([row["symptoms"]])
-        padded_seq = tf.keras.preprocessing.sequence.pad_sequences(seq, maxlen=50, padding="post")[0]
-        txt_numpy = np.expand_dims(padded_seq, axis=0).astype(np.int32)
+        if is_multimodal:
+            seq = tokenizer.texts_to_sequences([row["symptoms"]])
+            padded_seq = tf.keras.preprocessing.sequence.pad_sequences(seq, maxlen=50, padding="post")[0]
+            txt_numpy = np.expand_dims(padded_seq, axis=0).astype(np.int32)
+        else:
+            txt_numpy = None
         
         # 1. Keras model inference
         t_keras_start = time.perf_counter()
-        keras_preds = model.predict({"image_input": img_numpy, "text_input": txt_numpy}, verbose=0)
+        if is_multimodal:
+            keras_preds = model.predict({"image_input": img_numpy, "text_input": txt_numpy}, verbose=0)
+        else:
+            keras_preds = model.predict(img_numpy, verbose=0)
         keras_latency = (time.perf_counter() - t_keras_start) * 1000.0
         keras_class = np.argmax(keras_preds[0])
         keras_conf = keras_preds[0][keras_class]

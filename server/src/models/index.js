@@ -6,6 +6,7 @@ const SoilData = require('./SoilData.model');
 const CropRecord = require('./CropRecord.model');
 const FarmNew = require('./FarmNew.model');
 const CropRotation = require('./CropRotation.model');
+const DiseaseScan = require('./DiseaseScan.model');
 
 // Associations (Legacy)
 User.hasMany(Farm, { foreignKey: 'userId', onDelete: 'CASCADE' });
@@ -27,6 +28,13 @@ FarmNew.belongsTo(User, { foreignKey: 'userId' });
 FarmNew.hasMany(CropRotation, { foreignKey: 'farmId', onDelete: 'CASCADE' });
 CropRotation.belongsTo(FarmNew, { foreignKey: 'farmId' });
 
+// Disease Detection Scan History
+User.hasMany(DiseaseScan, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+DiseaseScan.belongsTo(User, { foreignKey: 'user_id' });
+
+FarmNew.hasMany(DiseaseScan, { foreignKey: 'farm_id', onDelete: 'CASCADE' });
+DiseaseScan.belongsTo(FarmNew, { foreignKey: 'farm_id' });
+
 const db = {
   sequelize,
   User,
@@ -35,7 +43,8 @@ const db = {
   SoilData,
   CropRecord,
   FarmNew,
-  CropRotation
+  CropRotation,
+  DiseaseScan
 };
 
 module.exports = db;

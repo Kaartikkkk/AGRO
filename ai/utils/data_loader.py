@@ -71,12 +71,13 @@ def load_tokenizer_pkl(save_path):
 
 def load_and_preprocess_image(path, size=(224, 224)):
     """
-    Decodes leaf images, resizes to 224x224, and normalizes pixel values to [0, 1].
+    Decodes leaf images, resizes to 224x224, and keeps pixel values in [0, 255] range as float32.
+    EfficientNet application has built-in rescaling layers.
     """
     img = tf.io.read_file(path)
     img = tf.image.decode_jpeg(img, channels=3)
     img = tf.image.resize(img, size)
-    img = tf.cast(img, tf.float32) / 255.0  # Normalize to [0, 1]
+    img = tf.cast(img, tf.float32)  # Keep range [0, 255]
     return img
 
 def create_multimodal_dataset(
@@ -133,6 +134,54 @@ def create_multimodal_dataset(
         ),
         num_parallel_calls=tf.data.AUTOTUNE
     )
+    
+    if is_training:
+        dataset = dataset.shuffle(buffer_size=1000)
+        
+    dataset = dataset.batch(batch_size).prefetch(buffer_size=tf.data.AUTOTUNE)
+    return dataset
+
+def create_unimodal_dataset(
+    metadata_csv_path,
+    data_dir,
+    batch_size=32,
+    is_training=True,
+    subset_fraction=None
+):
+    """
+    Creates an optimized tf.data.Dataset representing image -> one_hot_label.
+    """
+    if not os.path.exists(metadata_csv_path):
+        raise FileNotFoundError(f"Metadata file not found: {metadata_csv_path}")
+        
+    df = pd.read_csv(metadata_csv_path)
+    
+    # Stratified subsetting if requested
+    if subset_fraction is not None and 0 < subset_fraction < 1.0:
+        df = df.groupby("label").sample(frac=subset_fraction, random_state=42)
+    
+    # Resolve absolute image paths
+    image_paths = [os.path.join(data_dir, path) for path in df["image_path"].values]
+    
+    # One-hot encode labels (shape: [N, 38])
+    labels = df["label"].values
+    one_hot_labels = tf.one_hot(labels, depth=38)
+    
+    path_dataset = tf.data.Dataset.from_tensor_slices(image_paths)
+    label_dataset = tf.data.Dataset.from_tensor_slices(one_hot_labels)
+    
+    # Load/preprocess images
+    image_dataset = path_dataset.map(load_and_preprocess_image, num_parallel_calls=tf.data.AUTOTUNE)
+    
+    # Apply augmentations on training set ONLY
+    if is_training:
+        image_dataset = image_dataset.map(
+            lambda img: random_erasing(AUGMENTATION_LAYERS(img, training=True)),
+            num_parallel_calls=tf.data.AUTOTUNE
+        )
+        
+    # Combine inputs: image_input -> One-Hot Label
+    dataset = tf.data.Dataset.zip((image_dataset, label_dataset))
     
     if is_training:
         dataset = dataset.shuffle(buffer_size=1000)

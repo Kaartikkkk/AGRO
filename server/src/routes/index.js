@@ -7,5 +7,6 @@ router.use('/farms', require('./farms.routes'));
 router.use('/reminders', require('./reminders.routes'));
 router.use('/user', require('./user.routes'));
 router.use('/weather', require('./weather.routes'));
+router.use('/disease', require('./disease.routes'));
 
 module.exports = router;

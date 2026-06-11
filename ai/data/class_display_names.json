@@ -1,0 +1,230 @@
+{
+  "Apple___Apple_scab": {
+    "disease": "Apple scab",
+    "crop": "Apple",
+    "emoji": "\ud83c\udf4e",
+    "is_healthy": false
+  },
+  "Apple___Black_rot": {
+    "disease": "Black rot",
+    "crop": "Apple",
+    "emoji": "\ud83c\udf4e",
+    "is_healthy": false
+  },
+  "Apple___Cedar_apple_rust": {
+    "disease": "Cedar apple rust",
+    "crop": "Apple",
+    "emoji": "\ud83c\udf4e",
+    "is_healthy": false
+  },
+  "Apple___healthy": {
+    "disease": "Healthy",
+    "crop": "Apple",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Blueberry___healthy": {
+    "disease": "Healthy",
+    "crop": "Blueberry",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Cherry_(including_sour)___Powdery_mildew": {
+    "disease": "Powdery mildew",
+    "crop": "Cherry",
+    "emoji": "\ud83c\udf52",
+    "is_healthy": false
+  },
+  "Cherry_(including_sour)___healthy": {
+    "disease": "Healthy",
+    "crop": "Cherry",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": {
+    "disease": "Cercospora leaf spot Gray leaf spot",
+    "crop": "Corn (maize)",
+    "emoji": "\ud83c\udf3d",
+    "is_healthy": false
+  },
+  "Corn_(maize)___Common_rust_": {
+    "disease": "Common rust",
+    "crop": "Corn (maize)",
+    "emoji": "\ud83c\udf3d",
+    "is_healthy": false
+  },
+  "Corn_(maize)___Northern_Leaf_Blight": {
+    "disease": "Northern Leaf Blight",
+    "crop": "Corn (maize)",
+    "emoji": "\ud83c\udf3d",
+    "is_healthy": false
+  },
+  "Corn_(maize)___healthy": {
+    "disease": "Healthy",
+    "crop": "Corn (maize)",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Grape___Black_rot": {
+    "disease": "Black rot",
+    "crop": "Grape",
+    "emoji": "\ud83c\udf47",
+    "is_healthy": false
+  },
+  "Grape___Esca_(Black_Measles)": {
+    "disease": "Esca (Black Measles)",
+    "crop": "Grape",
+    "emoji": "\ud83c\udf47",
+    "is_healthy": false
+  },
+  "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)": {
+    "disease": "Leaf blight (Isariopsis Leaf Spot)",
+    "crop": "Grape",
+    "emoji": "\ud83c\udf47",
+    "is_healthy": false
+  },
+  "Grape___healthy": {
+    "disease": "Healthy",
+    "crop": "Grape",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Orange___Haunglongbing_(Citrus_greening)": {
+    "disease": "Haunglongbing (Citrus greening)",
+    "crop": "Orange",
+    "emoji": "\ud83c\udf4a",
+    "is_healthy": false
+  },
+  "Peach___Bacterial_spot": {
+    "disease": "Bacterial spot",
+    "crop": "Peach",
+    "emoji": "\ud83c\udf51",
+    "is_healthy": false
+  },
+  "Peach___healthy": {
+    "disease": "Healthy",
+    "crop": "Peach",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Pepper,_bell___Bacterial_spot": {
+    "disease": "Bacterial spot",
+    "crop": "Pepper, bell",
+    "emoji": "\ud83c\udf3f",
+    "is_healthy": false
+  },
+  "Pepper,_bell___healthy": {
+    "disease": "Healthy",
+    "crop": "Pepper, bell",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Potato___Early_blight": {
+    "disease": "Early blight",
+    "crop": "Potato",
+    "emoji": "\ud83e\udd54",
+    "is_healthy": false
+  },
+  "Potato___Late_blight": {
+    "disease": "Late blight",
+    "crop": "Potato",
+    "emoji": "\ud83e\udd54",
+    "is_healthy": false
+  },
+  "Potato___healthy": {
+    "disease": "Healthy",
+    "crop": "Potato",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Raspberry___healthy": {
+    "disease": "Healthy",
+    "crop": "Raspberry",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Soybean___healthy": {
+    "disease": "Healthy",
+    "crop": "Soybean",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Squash___Powdery_mildew": {
+    "disease": "Powdery mildew",
+    "crop": "Squash",
+    "emoji": "\ud83e\udd52",
+    "is_healthy": false
+  },
+  "Strawberry___Leaf_scorch": {
+    "disease": "Leaf scorch",
+    "crop": "Strawberry",
+    "emoji": "\ud83c\udf53",
+    "is_healthy": false
+  },
+  "Strawberry___healthy": {
+    "disease": "Healthy",
+    "crop": "Strawberry",
+    "emoji": "\u2705",
+    "is_healthy": true
+  },
+  "Tomato___Bacterial_spot": {
+    "disease": "Bacterial spot",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Early_blight": {
+    "disease": "Early blight",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Late_blight": {
+    "disease": "Late blight",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Leaf_Mold": {
+    "disease": "Leaf Mold",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Septoria_leaf_spot": {
+    "disease": "Septoria leaf spot",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Spider_mites Two-spotted_spider_mite": {
+    "disease": "Spider mites Two-spotted spider mite",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Target_Spot": {
+    "disease": "Target Spot",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Tomato_Yellow_Leaf_Curl_Virus": {
+    "disease": "Tomato Yellow Leaf Curl Virus",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___Tomato_mosaic_virus": {
+    "disease": "Tomato mosaic virus",
+    "crop": "Tomato",
+    "emoji": "\ud83c\udf45",
+    "is_healthy": false
+  },
+  "Tomato___healthy": {
+    "disease": "Healthy",
+    "crop": "Tomato",
+    "emoji": "\u2705",
+    "is_healthy": true
+  }
+}

@@ -7,7 +7,7 @@ import seaborn as sns
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc, roc_auc_score
 import tensorflow as tf
 
-from utils.data_loader import load_tokenizer_pkl, create_multimodal_dataset
+from utils.data_loader import load_tokenizer_pkl, create_multimodal_dataset, create_unimodal_dataset
 from utils.preprocess import CLASSES, CLASS_TO_IDX
 
 # Disable GPU allocation logs
@@ -36,14 +36,23 @@ def evaluate_dataset(model, tokenizer, dataset_name, csv_path, data_dir, eval_ou
         csv_path = temp_csv_path
         
     # Create dataset loader
-    ds = create_multimodal_dataset(
-        csv_path,
-        data_dir,
-        tokenizer,
-        max_seq_len=50,
-        batch_size=32,
-        is_training=False
-    )
+    is_multimodal = (len(model.inputs) > 1)
+    if is_multimodal:
+        ds = create_multimodal_dataset(
+            csv_path,
+            data_dir,
+            tokenizer,
+            max_seq_len=50,
+            batch_size=32,
+            is_training=False
+        )
+    else:
+        ds = create_unimodal_dataset(
+            csv_path,
+            data_dir,
+            batch_size=32,
+            is_training=False
+        )
     
     # Predict and collect labels
     y_true_onehot_list = []
@@ -213,7 +222,12 @@ def main():
         
     print(f"Loading Keras model from {model_path}...")
     model = tf.keras.models.load_model(model_path)
-    tokenizer = load_tokenizer_pkl(tokenizer_path)
+    
+    is_multimodal = (len(model.inputs) > 1)
+    if is_multimodal:
+        tokenizer = load_tokenizer_pkl(tokenizer_path)
+    else:
+        tokenizer = None
     
     # Paths to the 3 test datasets
     datasets_info = [

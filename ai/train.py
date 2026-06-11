@@ -7,8 +7,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard, CSVLogger
 
-from model import build_multimodal_model, compile_model
-from utils.data_loader import create_multimodal_dataset, load_tokenizer_pkl
+from model import build_unimodal_model, compile_model
+from utils.data_loader import create_unimodal_dataset, load_tokenizer_pkl
 from utils.preprocess import CLASSES
 
 # Enable memory growth to prevent allocation issues on GPUs
@@ -119,12 +119,12 @@ def main():
         "fusion_dense_128", "fusion_dropout_128", "disease_output"
     ]
 
-    # Model save checkpoints
-    phase1_ckpt = os.path.join(models_dir, "best_model_phase1.keras")
-    phase2_ckpt = os.path.join(models_dir, "best_model_phase2.keras")
-    phase3_ckpt = os.path.join(models_dir, "best_model_phase3.keras")
+    # Model save checkpoints (using _unimodal suffix to prevent loading multimodal checkpoints)
+    phase1_ckpt = os.path.join(models_dir, "best_model_phase1_unimodal.keras")
+    phase2_ckpt = os.path.join(models_dir, "best_model_phase2_unimodal.keras")
+    phase3_ckpt = os.path.join(models_dir, "best_model_phase3_unimodal.keras")
     
-    training_log_path = os.path.join(outputs_dir, "training_log.csv")
+    training_log_path = os.path.join(outputs_dir, "training_log_unimodal.csv")
 
     # =========================================================================
     # PHASE 1: Frozen Base (PlantVillage)
@@ -144,27 +144,24 @@ def main():
         pd.read_csv(val_metadata_path).sample(frac=0.01, random_state=42).to_csv(val_subset_path, index=False)
         
     p1_batch_size = int(hyperparams["batch_size"]) if not args.dry_run else 8
-    p1_epochs = 20 if not args.dry_run else 1
+    p1_epochs = 3 if not args.dry_run else 1
     
-    train_ds = create_multimodal_dataset(
-        train_subset_path, data_dir, tokenizer, batch_size=p1_batch_size, is_training=True
+    # Load unimodal dataset with a 10% stratified subset to speed up training
+    train_ds = create_unimodal_dataset(
+        train_subset_path, data_dir, batch_size=p1_batch_size, is_training=True,
+        subset_fraction=None if args.dry_run else 0.1
     )
-    val_ds = create_multimodal_dataset(
-        val_subset_path, data_dir, tokenizer, batch_size=p1_batch_size, is_training=False
+    val_ds = create_unimodal_dataset(
+        val_subset_path, data_dir, batch_size=p1_batch_size, is_training=False,
+        subset_fraction=None if args.dry_run else 0.1
     )
     
-    # Build initial model
-    model = build_multimodal_model(
+    # Build initial unimodal model
+    model = build_unimodal_model(
         num_classes=38,
-        vocab_size=5000,
-        max_seq_len=50,
-        embedding_dim=128,
-        lstm_units=int(hyperparams["lstm_units"]),
         image_projection_dim=256,
-        text_projection_dim=64,
         fc_units=int(hyperparams["dense_units"]),
         dropout_rate_img=float(hyperparams["dropout_rate"]),
-        dropout_rate_txt=float(hyperparams["dropout_rate"]),
         dropout_rate_fusion=float(hyperparams["dropout_rate"]),
         fine_tune_base=False  # Base EfficientNet model frozen
     )
@@ -248,7 +245,7 @@ def main():
         pd.read_csv(val_metadata_path).sample(frac=0.01, random_state=42).to_csv(val_subset_path, index=False)
         
     p2_batch_size = int(hyperparams["batch_size"]) if not args.dry_run else 8
-    p2_epochs = 15 if not args.dry_run else 1
+    p2_epochs = 2 if not args.dry_run else 1
     
     # Check if Phase 2 is already trained / resumed
     initial_epoch_ph2 = 0
@@ -276,16 +273,18 @@ def main():
         EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True, verbose=1),
         ModelCheckpoint(filepath=phase2_ckpt, monitor="val_loss", save_best_only=True, verbose=1),
         ReduceLROnPlateau(monitor="val_loss", factor=0.3, patience=3, min_lr=1e-6, verbose=1),
-        TensorBoard(log_dir=os.path.join(outputs_dir, "logs/phase2")),
+        TensorBoard(log_dir=os.path.join(outputs_dir, "logs/phase2_unimodal")),
         CSVLogger(filename=training_log_path, append=True)
     ]
     
     if not skip_ph2:
-        train_ds = create_multimodal_dataset(
-            train_subset_path, data_dir, tokenizer, batch_size=p2_batch_size, is_training=True
+        train_ds = create_unimodal_dataset(
+            train_subset_path, data_dir, batch_size=p2_batch_size, is_training=True,
+            subset_fraction=None if args.dry_run else 0.1
         )
-        val_ds = create_multimodal_dataset(
-            val_subset_path, data_dir, tokenizer, batch_size=p2_batch_size, is_training=False
+        val_ds = create_unimodal_dataset(
+            val_subset_path, data_dir, batch_size=p2_batch_size, is_training=False,
+            subset_fraction=None if args.dry_run else 0.1
         )
         print("Fine-tuning top 30 layers...")
         model.fit(
@@ -333,10 +332,10 @@ def main():
         pd.read_csv(pd_test_csv).sample(frac=0.02, random_state=42).to_csv(pd_test_subset, index=False)
         
     p3_batch_size = 16 if not args.dry_run else 8
-    p3_epochs = 10 if not args.dry_run else 1
+    p3_epochs = 2 if not args.dry_run else 1
     
-    pd_val_ds = create_multimodal_dataset(
-        pd_test_subset, data_dir, tokenizer, batch_size=p3_batch_size, is_training=False
+    pd_val_ds = create_unimodal_dataset(
+        pd_test_subset, data_dir, batch_size=p3_batch_size, is_training=False
     )
     
     # Check if Phase 3 is already trained / resumed
@@ -365,13 +364,13 @@ def main():
         EarlyStopping(monitor="val_loss", patience=5, restore_best_weights=True, verbose=1),
         ModelCheckpoint(filepath=phase3_ckpt, monitor="val_loss", save_best_only=True, verbose=1),
         ReduceLROnPlateau(monitor="val_loss", factor=0.3, patience=3, min_lr=1e-7, verbose=1),
-        TensorBoard(log_dir=os.path.join(outputs_dir, "logs/phase3")),
+        TensorBoard(log_dir=os.path.join(outputs_dir, "logs/phase3_unimodal")),
         CSVLogger(filename=training_log_path, append=True)
     ]
     
     if not skip_ph3:
-        pd_train_ds = create_multimodal_dataset(
-            pd_train_subset, data_dir, tokenizer, batch_size=p3_batch_size, is_training=True
+        pd_train_ds = create_unimodal_dataset(
+            pd_train_subset, data_dir, batch_size=p3_batch_size, is_training=True
         )
         print("Adapting model to PlantDoc domain...")
         model.fit(

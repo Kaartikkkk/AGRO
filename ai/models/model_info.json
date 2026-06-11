@@ -1,0 +1,12 @@
+{
+  "plant_disease_model_final.keras": {
+    "validation_accuracy": 0.814,
+    "is_multimodal": true,
+    "classes": 38
+  },
+  "agro_disease_model.h5": {
+    "validation_accuracy": 0.641,
+    "is_multimodal": false,
+    "classes": 38
+  }
+}

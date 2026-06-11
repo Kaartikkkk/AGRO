@@ -85,8 +85,52 @@ def build_multimodal_model(
     # Softmax output
     output = layers.Dense(num_classes, activation='softmax', name='disease_output')(x_fused)
     
+    return model
+
+def build_unimodal_model(
+    num_classes=38,
+    image_shape=(224, 224, 3),
+    image_projection_dim=256,
+    fc_units=256,
+    dropout_rate_img=0.4,
+    dropout_rate_fusion=0.3,
+    fine_tune_base=False
+):
+    """
+    Builds the Unimodal Plant Disease Detection model (Image-only branch).
+    - Image Branch: EfficientNetB3 + GlobalAveragePooling2D + Dense layers.
+    - Output: Softmax disease_output.
+    """
+    image_input = layers.Input(shape=image_shape, dtype='float32', name='image_input')
+    
+    # Load EfficientNetB3 base model
+    base_model = EfficientNetB3(
+        include_top=False,
+        weights='imagenet',
+        input_tensor=image_input
+    )
+    base_model.trainable = fine_tune_base
+    
+    # Image projection branch
+    x_img = layers.GlobalAveragePooling2D(name='image_gap')(base_model.output)
+    x_img = layers.Dense(512, activation='relu', name='image_dense_512')(x_img)
+    x_img = layers.BatchNormalization(name='image_bn_512')(x_img)
+    x_img = layers.Dropout(dropout_rate_img, name='image_dropout_512')(x_img)
+    x_img = layers.Dense(image_projection_dim, activation='relu', name='image_projection')(x_img)
+    
+    # Classification head
+    x = layers.Dense(fc_units, activation='relu', name='fusion_dense_256')(x_img)
+    x = layers.BatchNormalization(name='fusion_bn_256')(x)
+    x = layers.Dropout(dropout_rate_fusion, name='fusion_dropout_256')(x)
+    
+    x = layers.Dense(128, activation='relu', name='fusion_dense_128')(x)
+    x = layers.Dropout(0.2, name='fusion_dropout_128')(x)
+    
+    # Softmax output
+    output = layers.Dense(num_classes, activation='softmax', name='disease_output')(x)
+    
     # Assemble model
-    model = Model(inputs=[image_input, text_input], outputs=output, name='plant_disease_multimodal_v2')
+    model = Model(inputs=image_input, outputs=output, name='plant_disease_unimodal')
     
     return model
 
