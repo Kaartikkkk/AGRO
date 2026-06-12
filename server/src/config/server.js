@@ -30,7 +30,7 @@ const startServer = async () => {
     await sequelize.query('CREATE EXTENSION IF NOT EXISTS postgis;');
     console.log('🌍 PostGIS Extension Verified');
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log('✅ PostgreSQL Database Connected & Synced');
     
     app.listen(PORT, () => {

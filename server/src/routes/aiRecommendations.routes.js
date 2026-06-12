@@ -1,10 +1,14 @@
 const express = require('express');
 const { Op } = require('sequelize');
+const axios = require('axios');
 const { FarmNew, AIRecommendation, ChatHistory } = require('../models');
 const { protect } = require('../middleware/auth.middleware');
-const { buildFarmContext } = require('../services/recommendation.service');
+const { buildFarmContext, calculateGrowthStage } = require('../services/recommendation.service');
 const { generateFarmRecommendations, getChatbotResponse } = require('../services/gemini.service');
 const { buildChatSystemPrompt } = require('../prompts/chatbotPrompt');
+
+const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || '413c108a67537b5be674d686d76604ac';
+const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 const router = express.Router();
 

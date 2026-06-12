@@ -110,13 +110,33 @@ exports.getRecommendation = async (req, res) => {
   try {
     const { id } = req.params;
     const { weather } = req.body; // Expecting current weather info (rainfall chance)
+    console.log('🧪 getRecommendation called for farm ID:', id, 'by user:', req.user?.id);
 
-    const farm = await Farm.findOne({
+    let farm = await Farm.findOne({
       where: { id, userId: req.user.id },
       include: [SoilData, CropRecord]
     });
 
-    if (!farm) return res.status(404).json({ message: 'Farm not found' });
+    const { FarmNew } = require('../models');
+
+    // Fallback to FarmNew if legacy Farm is not found
+    if (!farm) {
+      console.log('🧪 Falling back to FarmNew query for farm ID:', id, 'and user ID:', req.user.id);
+      const farmNew = await FarmNew.findOne({
+        where: { id, userId: req.user.id }
+      });
+      console.log('🧪 FarmNew query result:', farmNew ? 'Found: ' + farmNew.plotName : 'Null');
+      if (!farmNew) return res.status(404).json({ message: 'Farm not found' });
+      
+      // Mock the structure expected by the recommendation logic
+      farm = {
+        id: farmNew.id,
+        farmName: farmNew.plotName,
+        cropType: farmNew.currentCrop,
+        SoilData: { nitrogen: 40, phosphorus: 25, potassium: 20, phLevel: 6.5 },
+        CropRecord: { cropStage: 'Vegetative' }
+      };
+    }
 
     const soil = farm.SoilData || { nitrogen: 40, phosphorus: 25, potassium: 20 };
     const crop = farm.CropRecord || { cropStage: 'Vegetative' };
@@ -195,12 +215,28 @@ exports.deleteFarm = async (req, res) => {
 exports.getFarmRecommendations = async (req, res) => {
   try {
     const { id } = req.params;
-    const farm = await Farm.findOne({
+    let farm = await Farm.findOne({
       where: { id, userId: req.user.id },
       include: [SoilData, CropRecord]
     });
 
-    if (!farm) return res.status(404).json({ message: 'Farm not found' });
+    const { FarmNew } = require('../models');
+
+    // Fallback to FarmNew if legacy Farm not found
+    if (!farm) {
+      const farmNew = await FarmNew.findOne({
+        where: { id, userId: req.user.id }
+      });
+      if (!farmNew) return res.status(404).json({ message: 'Farm not found' });
+      
+      farm = {
+        id: farmNew.id,
+        farmName: farmNew.plotName,
+        cropType: farmNew.currentCrop,
+        SoilData: { nitrogen: 40, phosphorus: 25, potassium: 20 },
+        CropRecord: { cropStage: 'Vegetative' }
+      };
+    }
 
     const soil = farm.SoilData || { nitrogen: 40, phosphorus: 25, potassium: 20 };
     const crop = farm.cropType || 'Wheat';

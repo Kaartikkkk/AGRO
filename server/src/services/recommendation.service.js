@@ -202,5 +202,6 @@ async function buildFarmContext(farmId, userId) {
 }
 
 module.exports = {
-  buildFarmContext
+  buildFarmContext,
+  calculateGrowthStage
 };

@@ -57,22 +57,22 @@ export const authService = {
 export const farmService = {
   // Returns all farms for a farmer
   getFarms: async () => {
-    const response = await api.get('/farm');
+    const response = await api.get('/farms');
     return response.data;
   },
   // Adds a new farm plot
   addFarm: async (data) => {
-    const response = await api.post('/farm', data);
+    const response = await api.post('/farms', data);
     return response.data;
   },
   // Updates a specific plot by ID
   updateFarm: async (id, data) => {
-    const response = await api.put(`/farm/${id}`, data);
+    const response = await api.put(`/farms/${id}`, data);
     return response.data;
   },
   // Decouples a plot
   deleteFarm: async (id) => {
-    const response = await api.delete(`/farm/${id}`);
+    const response = await api.delete(`/farms/${id}`);
     return response.data;
   },
   // Fertilizer Recommendation Engine
