@@ -10,8 +10,8 @@ if (!GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || 'dummy-key');
 
 // Instantiate both models to allow quick fallback
-const model20 = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-const model15 = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const modelPrimary = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+const modelFallback = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 
 // Fallback recommendations if both Gemini models fail
 const getFallbackRecommendations = (farmContext = {}) => {
@@ -195,23 +195,23 @@ async function generateFarmRecommendations(farmContext) {
   }
 
   try {
-    // Try Gemini 2.0 Flash first
-    return await runModel(model20);
+    // Try Gemini 2.5 Flash first
+    return await runModel(modelPrimary);
   } catch (error) {
     const isQuotaError = error.message?.includes('429') || error.message?.toLowerCase().includes('quota') || error.message?.toLowerCase().includes('rate');
     
     if (isQuotaError) {
-      console.warn('⚠️ Gemini 2.0 Flash hit quota limit. Retrying with Gemini 1.5 Flash...');
+      console.warn('⚠️ Gemini 2.5 Flash hit quota limit. Retrying with Gemini 2.5 Flash Lite...');
       try {
-        return await runModel(model15);
-      } catch (err15) {
-        console.error('❌ Gemini 1.5 Flash also failed:', err15.message);
+        return await runModel(modelFallback);
+      } catch (errFallback) {
+        console.error('❌ Gemini 2.5 Flash Lite also failed:', errFallback.message);
       }
     }
 
     // Default retry with stricter prompt
     try {
-      const activeModel = isQuotaError ? model15 : model20;
+      const activeModel = isQuotaError ? modelFallback : modelPrimary;
       const retryPrompt = `${prompt}\n\nWARNING: Your previous response was invalid. You MUST output a valid, clean JSON object matching the exact structure requested, with NO markdown formatting, no comments, and all required keys.`;
       
       const retryCall = activeModel.generateContent({
@@ -261,13 +261,13 @@ async function getChatbotResponse(message, history, systemPrompt) {
   try {
     let rawText;
     try {
-      // Try Gemini 2.0 first
-      rawText = await runChat(model20);
+      // Try Gemini 2.5 Flash first
+      rawText = await runChat(modelPrimary);
     } catch (error) {
       const isQuotaError = error.message?.includes('429') || error.message?.toLowerCase().includes('quota') || error.message?.toLowerCase().includes('rate');
       if (isQuotaError) {
-        console.warn('⚠️ Gemini 2.0 Flash chat hit quota limit. Retrying with Gemini 1.5 Flash...');
-        rawText = await runChat(model15);
+        console.warn('⚠️ Gemini 2.5 Flash chat hit quota limit. Retrying with Gemini 2.5 Flash Lite...');
+        rawText = await runChat(modelFallback);
       } else {
         throw error;
       }
