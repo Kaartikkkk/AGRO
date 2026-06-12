@@ -51,9 +51,19 @@ if __name__ == "__main__":
                 print("❌ Frontend process terminated.")
                 break
     except KeyboardInterrupt:
+        pass
+    finally:
         print("\n🛑 Stopping servers...")
-        ai_process.terminate()
-        backend_process.terminate()
-        frontend_process.terminate()
+        for name, proc in [("AI", ai_process), ("Backend", backend_process), ("Frontend", frontend_process)]:
+            if proc.poll() is None:
+                print(f"Terminating {name} process...")
+                try:
+                    proc.terminate()
+                    proc.wait(timeout=2)
+                except Exception:
+                    try:
+                        proc.kill()
+                    except Exception:
+                        pass
         print("✅ Servers stopped.")
         sys.exit(0)

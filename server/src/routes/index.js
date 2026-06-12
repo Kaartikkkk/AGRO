@@ -9,5 +9,6 @@ router.use('/user', require('./user.routes'));
 router.use('/weather', require('./weather.routes'));
 router.use('/disease', require('./disease.routes'));
 router.use('/ai', require('./aiRecommendations.routes'));
+router.use('/mandi', require('./mandi.routes'));
 
 module.exports = router;

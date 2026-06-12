@@ -185,11 +185,68 @@ export const LocationProvider = ({ children }) => {
             reject(err);
           }
         },
-        (error) => {
-          console.warn('GPS detection failed:', error.message);
-          setLocationError('GPS access denied or unavailable.');
-          setLocationLoading(false);
-          reject(error);
+        async (error) => {
+          console.warn('GPS detection failed, attempting IP-based geolocation fallback...', error.message);
+          try {
+            const ipRes = await fetch('https://ipapi.co/json/');
+            if (!ipRes.ok) throw new Error('IP API response error');
+            const ipData = await ipRes.json();
+            
+            if (ipData.latitude && ipData.longitude) {
+              const latitude = parseFloat(ipData.latitude);
+              const longitude = parseFloat(ipData.longitude);
+              
+              let locData = {};
+              try {
+                const res = await api.get(`/weather/reverse-geocode?lat=${latitude}&lon=${longitude}`);
+                locData = res.data;
+              } catch (geocodeErr) {
+                console.warn('Geocoding of fallback IP coordinates failed, using raw IP locations:', geocodeErr);
+              }
+
+              const newHome = {
+                id: 'home',
+                label: 'My Home',
+                type: 'home',
+                city: locData.city || ipData.city || 'N/A',
+                state: locData.state || ipData.region || 'N/A',
+                district: locData.district || ipData.city || 'N/A',
+                pincode: locData.pincode || ipData.postal || 'N/A',
+                latitude,
+                longitude,
+                source: 'ip_fallback'
+              };
+
+              // Save to DB
+              await api.put('/user/home-location', {
+                city: newHome.city,
+                state: newHome.state,
+                district: newHome.district,
+                pincode: newHome.pincode,
+                latitude,
+                longitude,
+                source: 'ip_fallback'
+              });
+
+              setHomeLocationState(newHome);
+
+              // Sync activeLocation if needed
+              if (!activeLocation || activeLocation.type === 'home') {
+                setActiveLocationState(newHome);
+                localStorage.setItem('agrosmart_active_location', JSON.stringify(newHome));
+              }
+
+              setLocationLoading(false);
+              resolve(newHome);
+            } else {
+              throw new Error('No coordinates returned from IP lookup');
+            }
+          } catch (fallbackError) {
+            console.error('IP geolocation fallback failed:', fallbackError);
+            setLocationError('GPS access denied and IP lookup failed.');
+            setLocationLoading(false);
+            reject(fallbackError);
+          }
         },
         { enableHighAccuracy: true, timeout: 7000 }
       );

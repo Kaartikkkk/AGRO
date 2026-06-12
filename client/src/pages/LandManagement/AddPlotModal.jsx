@@ -165,7 +165,7 @@ const AddPlotModal = ({ isOpen, onClose, onSave, editingPlot = null }) => {
     }
   };
 
-  // Browser Geolocation
+  // Browser Geolocation with IP Fallback
   const detectLocation = () => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -181,12 +181,40 @@ const AddPlotModal = ({ isOpen, onClose, onSave, editingPlot = null }) => {
             message: `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`
           });
         },
-        (error) => {
-          showToast({
-            type: 'error',
-            title: 'Location Capture Failed',
-            message: error.message || 'Please permit browser location permissions.'
-          });
+        async (error) => {
+          console.warn('Browser GPS capture failed, attempting IP-based geolocation fallback...', error);
+          try {
+            const ipRes = await fetch('https://ipapi.co/json/');
+            if (!ipRes.ok) throw new Error('IP API response error');
+            const ipData = await ipRes.json();
+            
+            if (ipData.latitude && ipData.longitude) {
+              const matchedState = INDIAN_STATES.find(s => s.toLowerCase() === ipData.region?.toLowerCase());
+              setFormData(prev => ({
+                ...prev,
+                latitude: parseFloat(ipData.latitude),
+                longitude: parseFloat(ipData.longitude),
+                village: prev.village || ipData.city || '',
+                district: prev.district || ipData.city || '',
+                state: prev.state || matchedState || '',
+                pincode: prev.pincode || ipData.postal || ''
+              }));
+              showToast({
+                type: 'success',
+                title: 'Coordinates Detected (IP Fallback)',
+                message: `Lat: ${parseFloat(ipData.latitude).toFixed(4)}, Lng: ${parseFloat(ipData.longitude).toFixed(4)} (Approximate position via IP)`
+              });
+            } else {
+              throw new Error('Invalid IP data coordinates');
+            }
+          } catch (fallbackError) {
+            console.error('IP Geolocation fallback failed:', fallbackError);
+            showToast({
+              type: 'error',
+              title: 'Location Capture Failed',
+              message: 'Could not obtain location automatically. Please click on the map or enter details manually.'
+            });
+          }
         }
       );
     } else {
