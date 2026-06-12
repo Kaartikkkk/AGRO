@@ -8,5 +8,6 @@ router.use('/reminders', require('./reminders.routes'));
 router.use('/user', require('./user.routes'));
 router.use('/weather', require('./weather.routes'));
 router.use('/disease', require('./disease.routes'));
+router.use('/ai', require('./aiRecommendations.routes'));
 
 module.exports = router;

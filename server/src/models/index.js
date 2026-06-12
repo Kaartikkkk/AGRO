@@ -7,6 +7,8 @@ const CropRecord = require('./CropRecord.model');
 const FarmNew = require('./FarmNew.model');
 const CropRotation = require('./CropRotation.model');
 const DiseaseScan = require('./DiseaseScan.model');
+const AIRecommendation = require('./AIRecommendation.model');
+const ChatHistory = require('./ChatHistory.model');
 
 // Associations (Legacy)
 User.hasMany(Farm, { foreignKey: 'userId', onDelete: 'CASCADE' });
@@ -35,6 +37,20 @@ DiseaseScan.belongsTo(User, { foreignKey: 'user_id' });
 FarmNew.hasMany(DiseaseScan, { foreignKey: 'farm_id', onDelete: 'CASCADE' });
 DiseaseScan.belongsTo(FarmNew, { foreignKey: 'farm_id' });
 
+// AI Recommendations Associations
+User.hasMany(AIRecommendation, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+AIRecommendation.belongsTo(User, { foreignKey: 'user_id' });
+
+FarmNew.hasMany(AIRecommendation, { foreignKey: 'farm_id', onDelete: 'CASCADE' });
+AIRecommendation.belongsTo(FarmNew, { foreignKey: 'farm_id' });
+
+// Chat History Associations
+User.hasMany(ChatHistory, { foreignKey: 'user_id', onDelete: 'CASCADE' });
+ChatHistory.belongsTo(User, { foreignKey: 'user_id' });
+
+FarmNew.hasMany(ChatHistory, { foreignKey: 'farm_id', onDelete: 'CASCADE' });
+ChatHistory.belongsTo(FarmNew, { foreignKey: 'farm_id' });
+
 const db = {
   sequelize,
   User,
@@ -44,7 +60,9 @@ const db = {
   CropRecord,
   FarmNew,
   CropRotation,
-  DiseaseScan
+  DiseaseScan,
+  AIRecommendation,
+  ChatHistory
 };
 
 module.exports = db;
