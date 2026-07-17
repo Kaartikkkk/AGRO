@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     print("\n✅ All servers are attempting to start...")
     print("📺 AI Service: http://localhost:5001")
-    print("📺 Backend API: http://localhost:5000")
+    print("📺 Backend API: http://localhost:5002")
     print("📺 Frontend Web: http://localhost:5173")
     print("\nPress Ctrl+C to stop all servers.")
 

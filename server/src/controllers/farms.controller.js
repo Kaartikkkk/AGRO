@@ -439,7 +439,7 @@ exports.diagnoseCropDisease = async (req, res) => {
     }
 
     // Add image url for frontend display
-    result.imageUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/uploads/${req.file.filename}`;
+    result.imageUrl = `${process.env.BASE_URL || 'http://localhost:5002'}/uploads/${req.file.filename}`;
 
     return res.json(result);
   } catch (error) {

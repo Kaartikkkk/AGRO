@@ -94,7 +94,7 @@ const Profile = () => {
               />
               {user?.avatarUrl ? (
                 <img 
-                  src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${user.avatarUrl}`} 
+                  src={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5002'}${user.avatarUrl}`} 
                   alt="Avatar" 
                   className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-lg"
                 />
