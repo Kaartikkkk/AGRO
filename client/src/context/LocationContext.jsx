@@ -187,60 +187,109 @@ export const LocationProvider = ({ children }) => {
         },
         async (error) => {
           console.warn('GPS detection failed, attempting IP-based geolocation fallback...', error.message);
-          try {
-            const ipRes = await fetch('https://ipapi.co/json/');
-            if (!ipRes.ok) throw new Error('IP API response error');
-            const ipData = await ipRes.json();
-            
-            if (ipData.latitude && ipData.longitude) {
-              const latitude = parseFloat(ipData.latitude);
-              const longitude = parseFloat(ipData.longitude);
-              
-              let locData = {};
-              try {
-                const res = await api.get(`/weather/reverse-geocode?lat=${latitude}&lon=${longitude}`);
-                locData = res.data;
-              } catch (geocodeErr) {
-                console.warn('Geocoding of fallback IP coordinates failed, using raw IP locations:', geocodeErr);
-              }
-
-              const newHome = {
-                id: 'home',
-                label: 'My Home',
-                type: 'home',
-                city: locData.city || ipData.city || 'N/A',
-                state: locData.state || ipData.region || 'N/A',
-                district: locData.district || ipData.city || 'N/A',
-                pincode: locData.pincode || ipData.postal || 'N/A',
-                latitude,
-                longitude,
-                source: 'ip_fallback'
+          let ipData = null;
+          
+          // Fallback service chain
+          const ipServices = [
+            async () => {
+              const res = await fetch('https://ipwho.is/');
+              if (!res.ok) throw new Error('ipwho.is failed');
+              const data = await res.json();
+              if (!data.success) throw new Error('ipwho.is unsuccessful');
+              return {
+                latitude: parseFloat(data.latitude),
+                longitude: parseFloat(data.longitude),
+                city: data.city,
+                region: data.region,
+                postal: data.postal
               };
-
-              // Save to DB
-              await api.put('/user/home-location', {
-                city: newHome.city,
-                state: newHome.state,
-                district: newHome.district,
-                pincode: newHome.pincode,
-                latitude,
-                longitude,
-                source: 'ip_fallback'
-              });
-
-              setHomeLocationState(newHome);
-
-              // Sync activeLocation if needed
-              if (!activeLocation || activeLocation.type === 'home') {
-                setActiveLocationState(newHome);
-                localStorage.setItem('agrosmart_active_location', JSON.stringify(newHome));
-              }
-
-              setLocationLoading(false);
-              resolve(newHome);
-            } else {
-              throw new Error('No coordinates returned from IP lookup');
+            },
+            async () => {
+              const res = await fetch('https://ipapi.co/json/');
+              if (!res.ok) throw new Error('ipapi.co failed');
+              const data = await res.json();
+              return {
+                latitude: parseFloat(data.latitude),
+                longitude: parseFloat(data.longitude),
+                city: data.city,
+                region: data.region,
+                postal: data.postal
+              };
+            },
+            async () => {
+              const res = await fetch('http://ip-api.com/json/');
+              if (!res.ok) throw new Error('ip-api.com failed');
+              const data = await res.json();
+              if (data.status !== 'success') throw new Error('ip-api.com unsuccessful');
+              return {
+                latitude: parseFloat(data.lat),
+                longitude: parseFloat(data.lon),
+                city: data.city,
+                region: data.regionName,
+                postal: data.zip
+              };
             }
+          ];
+
+          for (const service of ipServices) {
+            try {
+              ipData = await service();
+              break;
+            } catch (err) {
+              console.warn('IP service fallback step failed, trying next...', err.message);
+            }
+          }
+
+          try {
+            if (!ipData || !ipData.latitude || !ipData.longitude) {
+              throw new Error('All IP geolocation services failed');
+            }
+            
+            const latitude = ipData.latitude;
+            const longitude = ipData.longitude;
+            
+            let locData = {};
+            try {
+              const res = await api.get(`/weather/reverse-geocode?lat=${latitude}&lon=${longitude}`);
+              locData = res.data;
+            } catch (geocodeErr) {
+              console.warn('Geocoding of fallback IP coordinates failed, using raw IP locations:', geocodeErr);
+            }
+
+            const newHome = {
+              id: 'home',
+              label: 'My Home',
+              type: 'home',
+              city: locData.city || ipData.city || 'N/A',
+              state: locData.state || ipData.region || 'N/A',
+              district: locData.district || ipData.city || 'N/A',
+              pincode: locData.pincode || ipData.postal || 'N/A',
+              latitude,
+              longitude,
+              source: 'ip_fallback'
+            };
+
+            // Save to DB
+            await api.put('/user/home-location', {
+              city: newHome.city,
+              state: newHome.state,
+              district: newHome.district,
+              pincode: newHome.pincode,
+              latitude,
+              longitude,
+              source: 'ip_fallback'
+            });
+
+            setHomeLocationState(newHome);
+
+            // Sync activeLocation if needed
+            if (!activeLocation || activeLocation.type === 'home') {
+              setActiveLocationState(newHome);
+              localStorage.setItem('agrosmart_active_location', JSON.stringify(newHome));
+            }
+
+            setLocationLoading(false);
+            resolve(newHome);
           } catch (fallbackError) {
             console.error('IP geolocation fallback failed:', fallbackError);
             setLocationError('GPS access denied and IP lookup failed.');

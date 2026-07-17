@@ -289,16 +289,45 @@ router.get('/search-city', async (req, res) => {
     return res.status(400).json({ message: 'Query string is required' });
   }
 
-  try {
-    const response = await axios.get(`${GEO_BASE_URL}/direct`, {
-      params: {
-        q: `${q},IN`,
-        limit: 5,
-        appid: API_KEY
+  // Helper function to call OpenWeatherMap geocoder
+  const callOWM = async (queryStr) => {
+    try {
+      const response = await axios.get(`${GEO_BASE_URL}/direct`, {
+        params: {
+          q: `${queryStr},IN`,
+          limit: 5,
+          appid: API_KEY
+        }
+      });
+      return response.data || [];
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        return [];
       }
-    });
+      throw err;
+    }
+  };
 
-    const results = (response.data || []).map(place => ({
+  try {
+    // Clean up query string (remove redundant country suffix)
+    let cleanQ = q.trim();
+    cleanQ = cleanQ.replace(/,\s*(india|in)$/i, '');
+    cleanQ = cleanQ.replace(/\s+(india|in)$/i, '');
+
+    let results = await callOWM(cleanQ);
+
+    // Fallback: If no results found and query has multiple parts (e.g. Village, District, State),
+    // progressively drop the most specific parts (left-most) and retry.
+    if (results.length === 0 && cleanQ.includes(',')) {
+      const parts = cleanQ.split(',').map(p => p.trim());
+      while (parts.length > 1 && results.length === 0) {
+        parts.shift(); // Drop the left-most specific part
+        const fallbackQuery = parts.join(', ');
+        results = await callOWM(fallbackQuery);
+      }
+    }
+
+    const formatted = results.map(place => ({
       name: place.name,
       state: place.state || '',
       country: place.country,
@@ -306,7 +335,7 @@ router.get('/search-city', async (req, res) => {
       lon: place.lon
     }));
 
-    res.json(results);
+    res.json(formatted);
   } catch (error) {
     console.error('Error searching city:', error.message);
     res.status(500).json({ message: 'Failed to search city.' });

@@ -65,7 +65,7 @@ const User = sequelize.define('User', {
     allowNull: true
   },
   location_source: {
-    type: DataTypes.ENUM('gps', 'manual'),
+    type: DataTypes.ENUM('gps', 'manual', 'ip_fallback'),
     defaultValue: 'manual',
     allowNull: false
   }

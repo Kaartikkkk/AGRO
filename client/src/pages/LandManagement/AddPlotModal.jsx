@@ -183,30 +183,79 @@ const AddPlotModal = ({ isOpen, onClose, onSave, editingPlot = null }) => {
         },
         async (error) => {
           console.warn('Browser GPS capture failed, attempting IP-based geolocation fallback...', error);
-          try {
-            const ipRes = await fetch('https://ipapi.co/json/');
-            if (!ipRes.ok) throw new Error('IP API response error');
-            const ipData = await ipRes.json();
-            
-            if (ipData.latitude && ipData.longitude) {
-              const matchedState = INDIAN_STATES.find(s => s.toLowerCase() === ipData.region?.toLowerCase());
-              setFormData(prev => ({
-                ...prev,
-                latitude: parseFloat(ipData.latitude),
-                longitude: parseFloat(ipData.longitude),
-                village: prev.village || ipData.city || '',
-                district: prev.district || ipData.city || '',
-                state: prev.state || matchedState || '',
-                pincode: prev.pincode || ipData.postal || ''
-              }));
-              showToast({
-                type: 'success',
-                title: 'Coordinates Detected (IP Fallback)',
-                message: `Lat: ${parseFloat(ipData.latitude).toFixed(4)}, Lng: ${parseFloat(ipData.longitude).toFixed(4)} (Approximate position via IP)`
-              });
-            } else {
-              throw new Error('Invalid IP data coordinates');
+          let ipData = null;
+
+          // Fallback service chain
+          const ipServices = [
+            async () => {
+              const res = await fetch('https://ipwho.is/');
+              if (!res.ok) throw new Error('ipwho.is failed');
+              const data = await res.json();
+              if (!data.success) throw new Error('ipwho.is unsuccessful');
+              return {
+                latitude: parseFloat(data.latitude),
+                longitude: parseFloat(data.longitude),
+                city: data.city,
+                region: data.region,
+                postal: data.postal
+              };
+            },
+            async () => {
+              const res = await fetch('https://ipapi.co/json/');
+              if (!res.ok) throw new Error('ipapi.co failed');
+              const data = await res.json();
+              return {
+                latitude: parseFloat(data.latitude),
+                longitude: parseFloat(data.longitude),
+                city: data.city,
+                region: data.region,
+                postal: data.postal
+              };
+            },
+            async () => {
+              const res = await fetch('http://ip-api.com/json/');
+              if (!res.ok) throw new Error('ip-api.com failed');
+              const data = await res.json();
+              if (data.status !== 'success') throw new Error('ip-api.com unsuccessful');
+              return {
+                latitude: parseFloat(data.lat),
+                longitude: parseFloat(data.lon),
+                city: data.city,
+                region: data.regionName,
+                postal: data.zip
+              };
             }
+          ];
+
+          for (const service of ipServices) {
+            try {
+              ipData = await service();
+              break;
+            } catch (err) {
+              console.warn('IP service fallback step failed, trying next...', err.message);
+            }
+          }
+
+          try {
+            if (!ipData || !ipData.latitude || !ipData.longitude) {
+              throw new Error('All IP geolocation services failed');
+            }
+
+            const matchedState = INDIAN_STATES.find(s => s.toLowerCase() === ipData.region?.toLowerCase());
+            setFormData(prev => ({
+              ...prev,
+              latitude: ipData.latitude,
+              longitude: ipData.longitude,
+              village: prev.village || ipData.city || '',
+              district: prev.district || ipData.city || '',
+              state: prev.state || matchedState || '',
+              pincode: prev.pincode || ipData.postal || ''
+            }));
+            showToast({
+              type: 'success',
+              title: 'Coordinates Detected (IP Fallback)',
+              message: `Lat: ${ipData.latitude.toFixed(4)}, Lng: ${ipData.longitude.toFixed(4)} (Approximate position via IP)`
+            });
           } catch (fallbackError) {
             console.error('IP Geolocation fallback failed:', fallbackError);
             showToast({

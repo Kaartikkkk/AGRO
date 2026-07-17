@@ -130,8 +130,78 @@ const LocationSetupModal = ({ isOpen, onClose, mode = 'home', farmId = null, ini
           setGpsLoading(false);
         }
       },
-      (err) => {
-        setGpsError("GPS permission denied or timed out.");
+      async (err) => {
+        // GPS failed — try IP-based geolocation fallback chain
+        console.warn('GPS failed, attempting IP fallback...', err.message);
+        let ipData = null;
+
+        const ipServices = [
+          async () => {
+            const res = await fetch('https://ipwho.is/');
+            if (!res.ok) throw new Error('ipwho.is failed');
+            const data = await res.json();
+            if (!data.success) throw new Error('ipwho.is unsuccessful');
+            return { latitude: data.latitude, longitude: data.longitude, city: data.city, region: data.region, postal: data.postal };
+          },
+          async () => {
+            const res = await fetch('https://ipapi.co/json/');
+            if (!res.ok) throw new Error('ipapi.co failed');
+            const data = await res.json();
+            return { latitude: data.latitude, longitude: data.longitude, city: data.city, region: data.region, postal: data.postal };
+          },
+          async () => {
+            const res = await fetch('http://ip-api.com/json/');
+            if (!res.ok) throw new Error('ip-api.com failed');
+            const data = await res.json();
+            if (data.status !== 'success') throw new Error('ip-api.com unsuccessful');
+            return { latitude: data.lat, longitude: data.lon, city: data.city, region: data.regionName, postal: data.zip };
+          }
+        ];
+
+        for (const service of ipServices) {
+          try {
+            ipData = await service();
+            break;
+          } catch (svcErr) {
+            console.warn('IP service step failed, trying next...', svcErr.message);
+          }
+        }
+
+        if (ipData && ipData.latitude && ipData.longitude) {
+          try {
+            const lat = parseFloat(ipData.latitude);
+            const lon = parseFloat(ipData.longitude);
+            
+            // Try to get detailed location from our backend reverse geocode
+            let locData = {};
+            try {
+              const res = await weatherService.reverseGeocode(lat, lon);
+              locData = res;
+            } catch (geocodeErr) {
+              console.warn('Reverse geocode of IP coords failed, using raw IP data:', geocodeErr);
+            }
+
+            setCity(locData.city || ipData.city || '');
+            setState(locData.state || ipData.region || '');
+            setDistrict(locData.district || ipData.city || '');
+            setPincode(locData.pincode || ipData.postal || '');
+            setLatitude(lat.toFixed(6));
+            setLongitude(lon.toFixed(6));
+            setSource('ip_fallback');
+
+            showToast({
+              type: 'success',
+              title: 'Location Detected (IP)',
+              message: `Approximate location: ${locData.city || ipData.city}, ${locData.state || ipData.region}`
+            });
+          } catch (fillErr) {
+            console.error('Failed to fill form from IP data:', fillErr);
+            setGpsError("GPS permission denied. Please use city search or enter details manually.");
+          }
+        } else {
+          setGpsError("GPS permission denied. Please use city search or enter details manually.");
+        }
+
         setGpsLoading(false);
       },
       { enableHighAccuracy: true, timeout: 6000 }

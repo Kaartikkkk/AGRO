@@ -3,6 +3,7 @@ import os
 import sys
 import time
 
+
 def run_command(command, cwd):
     print(f"🚀 Starting: {command} in {cwd}")
     return subprocess.Popen(command, shell=True, cwd=cwd)

@@ -23,7 +23,8 @@ const LocationOnboardingModal = () => {
     completeOnboarding, 
     detectGPSLocation,
     homeLocation,
-    farms
+    farms,
+    refreshAllLocations
   } = useLocation();
 
   const [step, setStep] = useState(1);

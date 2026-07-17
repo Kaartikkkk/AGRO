@@ -207,7 +207,62 @@ const CompleteProfile = () => {
             }
           } catch (err) { console.warn(err); } finally { setDetectingLocation(false); }
         },
-        () => setDetectingLocation(false),
+        async () => {
+          // GPS failed — try IP-based fallback chain
+          console.warn('GPS failed in CompleteProfile, trying IP fallback...');
+          const ipServices = [
+            async () => {
+              const res = await fetch('https://ipwho.is/');
+              if (!res.ok) throw new Error('ipwho.is failed');
+              const data = await res.json();
+              if (!data.success) throw new Error('ipwho.is unsuccessful');
+              return { lat: data.latitude, lon: data.longitude, city: data.city, region: data.region };
+            },
+            async () => {
+              const res = await fetch('https://ipapi.co/json/');
+              if (!res.ok) throw new Error('ipapi.co failed');
+              const data = await res.json();
+              return { lat: data.latitude, lon: data.longitude, city: data.city, region: data.region };
+            },
+            async () => {
+              const res = await fetch('http://ip-api.com/json/');
+              if (!res.ok) throw new Error('ip-api.com failed');
+              const data = await res.json();
+              if (data.status !== 'success') throw new Error('ip-api.com unsuccessful');
+              return { lat: data.lat, lon: data.lon, city: data.city, region: data.regionName };
+            }
+          ];
+
+          let ipData = null;
+          for (const service of ipServices) {
+            try { ipData = await service(); break; }
+            catch (e) { console.warn('IP service failed, trying next...', e.message); }
+          }
+
+          if (ipData && ipData.lat && ipData.lon) {
+            const latitude = parseFloat(ipData.lat);
+            const longitude = parseFloat(ipData.lon);
+
+            // Try Nominatim reverse geocode for detailed address
+            let city = ipData.city || '';
+            let state = ipData.region || '';
+            try {
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
+                headers: { 'User-Agent': 'AgroSmart-App/1.0' }
+              });
+              const data = await res.json();
+              city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || city;
+              state = data.address?.state || state;
+            } catch (e) { console.warn('Nominatim reverse geocode failed, using IP data:', e); }
+
+            if (state && city) {
+              setFormData(prev => ({ ...prev, state, cityVillage: city }));
+              setMapCenter([latitude, longitude]);
+            }
+          }
+
+          setDetectingLocation(false);
+        },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else { setDetectingLocation(false); }

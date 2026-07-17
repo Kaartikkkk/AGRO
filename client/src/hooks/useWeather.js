@@ -11,18 +11,75 @@ export const useWeather = (locationOverride = null) => {
   const [hourly, setHourly] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [detectedLocation, setDetectedLocation] = useState(null);
+
+  // IP-based location detection as fallback
+  const detectLocationViaIP = useCallback(async () => {
+    const ipServices = [
+      async () => {
+        const res = await fetch('https://ipwho.is/');
+        if (!res.ok) throw new Error('ipwho.is failed');
+        const data = await res.json();
+        if (!data.success) throw new Error('ipwho.is unsuccessful');
+        return { latitude: data.latitude, longitude: data.longitude, city: data.city, state: data.region };
+      },
+      async () => {
+        const res = await fetch('https://ipapi.co/json/');
+        if (!res.ok) throw new Error('ipapi.co failed');
+        const data = await res.json();
+        return { latitude: data.latitude, longitude: data.longitude, city: data.city, state: data.region };
+      },
+      async () => {
+        const res = await fetch('http://ip-api.com/json/');
+        if (!res.ok) throw new Error('ip-api.com failed');
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error('ip-api.com unsuccessful');
+        return { latitude: data.lat, longitude: data.lon, city: data.city, state: data.regionName };
+      }
+    ];
+
+    for (const service of ipServices) {
+      try {
+        const result = await service();
+        if (result.latitude && result.longitude) return result;
+      } catch (e) {
+        console.warn('IP location service failed, trying next...', e.message);
+      }
+    }
+    return null;
+  }, []);
 
   const fetchWeather = useCallback(async () => {
-    if (!location || location.latitude === undefined || location.longitude === undefined || location.latitude === null || location.longitude === null) {
+    setLoading(true);
+    setError(null);
+
+    // Determine which coordinates to use
+    let lat = location?.latitude;
+    let lon = location?.longitude;
+
+    // If no location is set, try IP-based detection
+    if (lat === undefined || lat === null || lon === undefined || lon === null) {
+      try {
+        const ipLoc = await detectLocationViaIP();
+        if (ipLoc) {
+          lat = parseFloat(ipLoc.latitude);
+          lon = parseFloat(ipLoc.longitude);
+          setDetectedLocation(ipLoc);
+        }
+      } catch (e) {
+        console.warn('IP location detection for weather failed:', e);
+      }
+    }
+
+    if (lat === undefined || lat === null || lon === undefined || lon === null) {
       setLoading(false);
+      setError('No location available. Please set your home location to see weather data.');
       return;
     }
 
-    setLoading(true);
-    setError(null);
     try {
-      const currentData = await weatherService.getCurrentWeather(location.latitude, location.longitude);
-      const forecastData = await weatherService.getWeatherForecast(location.latitude, location.longitude);
+      const currentData = await weatherService.getCurrentWeather(lat, lon);
+      const forecastData = await weatherService.getWeatherForecast(lat, lon);
 
       setWeather(currentData);
       setForecast(forecastData.forecast || []);
@@ -33,15 +90,15 @@ export const useWeather = (locationOverride = null) => {
     } finally {
       setLoading(false);
     }
-  }, [location?.latitude, location?.longitude]);
+  }, [location?.latitude, location?.longitude, detectLocationViaIP]);
 
   useEffect(() => {
     fetchWeather();
   }, [fetchWeather]);
 
-  const locationLabel = location 
-    ? (location.type === 'home' ? `${location.city}` : `${location.label}`) 
-    : 'Unknown Location';
+  const locationLabel = location
+    ? (location.type === 'home' ? `${location.city}` : `${location.label}`)
+    : (detectedLocation ? `${detectedLocation.city}` : 'Unknown Location');
 
   return {
     weather,
@@ -55,3 +112,4 @@ export const useWeather = (locationOverride = null) => {
 };
 
 export default useWeather;
+
