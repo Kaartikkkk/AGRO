@@ -96,7 +96,7 @@ export const FarmProvider = ({ children }) => {
   const getFertilizerRecommendation = async (weatherInfo) => {
     if (!activeFarmId) return;
     try {
-      const data = await farmService.getRecommendation(activeFarmId, { weather: weatherInfo });
+      const data = await farmService.getRecommendation(activeFarmId, { weather: { rainfall_chance: weatherInfo } });
       setRecommendation(data);
       return data;
     } catch (error) {

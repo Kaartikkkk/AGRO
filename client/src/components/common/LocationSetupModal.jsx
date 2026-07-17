@@ -15,6 +15,45 @@ import weatherService from '../../services/weather.service';
 import api from '../../services/api.service';
 import { useToast } from '../common/Toast';
 
+// Leaflet interactive map imports
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix Leaflet default marker icons in Vite packaging
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Map click event listener
+const MapEventsHandler = ({ onMapClick }) => {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    }
+  });
+  return null;
+};
+
+// Dynamic map view centering component
+const ChangeMapView = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center && center[0] && center[1]) {
+      map.setView(center, map.getZoom() > 4 ? map.getZoom() : 13);
+    }
+  }, [center, map]);
+  return null;
+};
+
 const INDIAN_STATES = [
   "Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
   "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa",
@@ -39,6 +78,33 @@ const LocationSetupModal = ({ isOpen, onClose, mode = 'home', farmId = null, ini
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [source, setSource] = useState('manual');
+
+  const parsedLat = parseFloat(latitude);
+  const parsedLng = parseFloat(longitude);
+  const hasValidCoords = !isNaN(parsedLat) && !isNaN(parsedLng);
+
+  const handleMapClick = async (lat, lng) => {
+    setLatitude(lat.toFixed(6));
+    setLongitude(lng.toFixed(6));
+    setSource('manual');
+    
+    try {
+      const res = await weatherService.reverseGeocode(lat, lng);
+      if (res) {
+        setCity(res.city || '');
+        setState(res.state || '');
+        setDistrict(res.district || '');
+        setPincode(res.pincode || '');
+        showToast({
+          type: 'success',
+          title: 'Coordinates Updated',
+          message: `Position set: ${res.city || 'Custom Location'}, ${res.state || ''}`
+        });
+      }
+    } catch (err) {
+      console.warn('Reverse geocode failed on map click:', err);
+    }
+  };
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -519,6 +585,28 @@ const LocationSetupModal = ({ isOpen, onClose, mode = 'home', farmId = null, ini
                       placeholder="E.g., 75.8573"
                     />
                   </div>
+                </div>
+
+                {/* Leaflet Interactive Map */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500">Pinpoint Exact Location on Map</label>
+                  <div className="h-48 w-full rounded-2xl overflow-hidden border border-gray-200 z-10">
+                    <MapContainer 
+                      center={hasValidCoords ? [parsedLat, parsedLng] : [20.5937, 78.9629]} 
+                      zoom={hasValidCoords ? 13 : 4} 
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; OpenStreetMap'
+                      />
+                      {hasValidCoords && <Marker position={[parsedLat, parsedLng]} />}
+                      <ChangeMapView center={hasValidCoords ? [parsedLat, parsedLng] : null} />
+                      <MapEventsHandler onMapClick={handleMapClick} />
+                    </MapContainer>
+                  </div>
+                  <p className="text-[10px] text-gray-400 italic text-center">Click or tap on the map to pinpoint your exact home/farm location.</p>
                 </div>
 
                 {/* Footer Save Row */}
