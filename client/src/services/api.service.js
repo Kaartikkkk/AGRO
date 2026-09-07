@@ -14,6 +14,9 @@ api.interceptors.request.use((config) => {
   const user = JSON.parse(localStorage.getItem('agrosmart_user'));
   if (user && user.token) {
     config.headers.Authorization = `Bearer ${user.token}`;
+    console.log(`[API Request] ${config.method.toUpperCase()} ${config.url} - Auth Token Set`);
+  } else {
+    console.log(`[API Request] ${config.method.toUpperCase()} ${config.url} - No Auth Token`);
   }
   return config;
 }, (error) => {
@@ -21,11 +24,19 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`[API Response] ${response.config.method.toUpperCase()} ${response.config.url} - Status ${response.status}`);
+    return response;
+  },
   (error) => {
+    console.error(`[API Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, error.response ? `Status ${error.response.status}` : error.message);
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('agrosmart_user');
-      window.location.href = '/login';
+      const isAuthRequest = error.config && (error.config.url.includes('/auth/login') || error.config.url.includes('/auth/register'));
+      if (!isAuthRequest) {
+        console.warn('[API Auth] 401 Unauthorized detected on protected route. Clearing token and redirecting to login.');
+        localStorage.removeItem('agrosmart_user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

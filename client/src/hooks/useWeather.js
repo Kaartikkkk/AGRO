@@ -6,6 +6,8 @@ import { useFarm } from '../context/FarmContext';
 export const useWeather = (locationOverride = null) => {
   const { activeLocation } = useLocation();
   const location = locationOverride || activeLocation;
+  const farmContext = useFarm();
+  const setFarmWeather = farmContext ? farmContext.setWeather : null;
 
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
@@ -87,19 +89,17 @@ export const useWeather = (locationOverride = null) => {
       setHourly(forecastData.hourly || []);
 
       // Also sync it to FarmContext if available, adding today's rainfall chance from the forecast
-      try {
-        const todayForecast = forecastData.forecast?.[0];
-        const combinedWeather = {
-          ...currentData,
-          rainfall_chance: todayForecast ? todayForecast.rain_chance : 0
-        };
-        const { setWeather: setFarmWeather } = useFarm();
-        if (setFarmWeather) {
+      if (setFarmWeather) {
+        try {
+          const todayForecast = forecastData.forecast?.[0];
+          const combinedWeather = {
+            ...currentData,
+            rainfall_chance: todayForecast ? todayForecast.rain_chance : 0
+          };
           setFarmWeather(combinedWeather);
+        } catch (contextErr) {
+          console.debug('Failed to sync weather to FarmContext:', contextErr);
         }
-      } catch (contextErr) {
-        // Handle case where useFarm hook is called outside FarmProvider context (e.g. landing page)
-        console.debug('FarmContext not found, skipping weather sync');
       }
     } catch (err) {
       console.error('Error in useWeather hook:', err);
@@ -107,7 +107,7 @@ export const useWeather = (locationOverride = null) => {
     } finally {
       setLoading(false);
     }
-  }, [location?.latitude, location?.longitude, detectLocationViaIP]);
+  }, [location?.latitude, location?.longitude, detectLocationViaIP, setFarmWeather]);
 
   useEffect(() => {
     fetchWeather();
