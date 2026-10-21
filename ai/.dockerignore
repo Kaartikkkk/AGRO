@@ -1,0 +1,12 @@
+venv
+.venv
+__pycache__
+*.pyc
+.git
+.DS_Store
+/data/processed
+/data/merged
+/data/plantdoc
+/data/plantvillage
+/notebooks
+/outputs

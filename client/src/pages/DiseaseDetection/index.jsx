@@ -8,6 +8,7 @@ import {
 import DashboardLayout from '../../components/layout/MainLayout';
 import { useFarm } from '../../context/FarmContext';
 import { diseaseService } from '../../services/disease.service';
+import { getMediaUrl } from '../../services/api.service';
 
 const ConfettiEffect = () => {
   const particles = Array.from({ length: 30 });
@@ -866,7 +867,7 @@ const DiseaseScannerPage = () => {
                           {/* Image thumbnail */}
                           <div className="h-14 w-14 rounded-xl overflow-hidden bg-black shrink-0 border border-gray-100">
                             <img 
-                              src={scan.grad_cam_url || `/uploads/${scan.image_filename}`} 
+                              src={getMediaUrl(scan.grad_cam_url || `/uploads/${scan.image_filename}`)} 
                               alt="Scan crop visual" 
                               className="h-full w-full object-cover" 
                             />
@@ -909,7 +910,7 @@ const DiseaseScannerPage = () => {
                               type="button"
                               onClick={() => {
                                 // Pre-fill scanner with this selection
-                                setSelectedImage(`/uploads/${scan.image_filename}`);
+                                setSelectedImage(getMediaUrl(`/uploads/${scan.image_filename}`));
                                 setCropType(scan.crop_type);
                                 setSymptoms(scan.symptoms_text || '');
                                 setFarmId(scan.farm_id || '');
@@ -941,7 +942,7 @@ const DiseaseScannerPage = () => {
                               <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Diagnostic Image</h5>
                               <div className="rounded-xl overflow-hidden border border-gray-100 bg-black aspect-video flex items-center justify-center max-h-[160px]">
                                 <img 
-                                  src={scan.grad_cam_url || `/uploads/${scan.image_filename}`} 
+                                  src={getMediaUrl(scan.grad_cam_url || `/uploads/${scan.image_filename}`)} 
                                   alt="Heatmap focus analysis" 
                                   className="h-full w-full object-contain" 
                                 />

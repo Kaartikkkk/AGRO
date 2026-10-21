@@ -70,7 +70,7 @@ router.post('/predict', (req, res) => {
       form.append('symptoms', symptoms);
       form.append('crop_type', cropType);
 
-      const flaskUrl = process.env.FLASK_AI_URL || 'http://localhost:5001';
+      const flaskUrl = process.env.FLASK_AI_URL || process.env.AI_SERVER_URL || 'http://localhost:5001';
       
       // 2. Call Flask AI Server prediction endpoint (timeout 30s)
       let predictionResult;
@@ -210,7 +210,7 @@ router.get('/history', async (req, res) => {
  * @desc    Ping Flask health status and report
  */
 router.get('/health', async (req, res) => {
-  const flaskUrl = process.env.FLASK_AI_URL || 'http://localhost:5001';
+  const flaskUrl = process.env.FLASK_AI_URL || process.env.AI_SERVER_URL || 'http://localhost:5001';
   try {
     const response = await axios.get(`${flaskUrl}/health`, { timeout: 3000 });
     return res.status(200).json({

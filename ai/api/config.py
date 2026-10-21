@@ -12,6 +12,6 @@ FALLBACK_MODEL = 'agro_disease_model.h5'
 IMG_SIZE = (224, 224)
 MAX_TEXT_LEN = 50
 VOCAB_SIZE = 5000
-PORT = 5001
+PORT = int(os.environ.get('PORT', 5001))
 DEBUG = False
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB

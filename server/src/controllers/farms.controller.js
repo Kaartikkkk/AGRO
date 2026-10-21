@@ -406,8 +406,9 @@ exports.diagnoseCropDisease = async (req, res) => {
         formData.append('symptoms', symptoms);
       }
 
-      console.log(`🤖 Sending image to AI Model at ${process.env.AI_SERVER_URL || 'http://localhost:5001'}/predict...`);
-      const flaskResponse = await fetch(`${process.env.AI_SERVER_URL || 'http://localhost:5001'}/predict`, {
+      const aiUrl = process.env.AI_SERVER_URL || process.env.FLASK_AI_URL || 'http://localhost:5001';
+      console.log(`🤖 Sending image to AI Model at ${aiUrl}/predict...`);
+      const flaskResponse = await fetch(`${aiUrl}/predict`, {
         method: 'POST',
         body: formData,
         signal: AbortSignal.timeout(6000) // 6 second timeout

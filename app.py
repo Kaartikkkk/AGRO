@@ -17,6 +17,18 @@ if __name__ == "__main__":
 
     print("🌾 --- AgroSmart Unified Starter --- 🌾")
     
+    # Check and start PostgreSQL if not ready
+    try:
+        res = subprocess.run("pg_isready", shell=True, capture_output=True)
+        if res.returncode != 0:
+            print("🐘 Starting PostgreSQL server...")
+            subprocess.run("pg_ctl -D /opt/homebrew/var/postgres_kartikkk -l /tmp/postgres.log start", shell=True)
+            time.sleep(2)
+        else:
+            print("🐘 PostgreSQL is active.")
+    except Exception as e:
+        print(f"⚠️ Postgres auto-start check: {e}")
+
     # Start AI Flask Microservice
     ai_process = run_command("./venv/bin/python api/app.py", ai_dir)
     
